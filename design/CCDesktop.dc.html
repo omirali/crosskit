@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Crosskit — карта задачи</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0a64d8}a:hover{color:#074aa3}
+button{font:inherit;color:inherit;text-align:left;border:0;background:none;padding:0;margin:0;cursor:pointer}
+button:focus-visible{outline:2px solid #0a64d8;outline-offset:2px;border-radius:8px}
+</style>
+</helmet>
+<div style="{{ themeVars }}; min-height: 900px; display: flex; flex-wrap: wrap; gap: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif; font-size: 13px; line-height: 18px; -webkit-font-smoothing: antialiased; box-sizing: border-box; padding: 10px">
+
+  <nav aria-label="Задачи" style="flex: 1 1 248px; max-width: 280px; min-width: 232px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 14px 10px 12px; border-radius: 18px; background: var(--side); box-shadow: var(--sideShadow)">
+    <div style="display: flex; gap: 8px; padding: 2px 6px 6px" aria-hidden="true">
+      <div style="width: 12px; height: 12px; border-radius: 6px; background: #ff5f57"></div>
+      <div style="width: 12px; height: 12px; border-radius: 6px; background: #febc2e"></div>
+      <div style="width: 12px; height: 12px; border-radius: 6px; background: #28c840"></div>
+    </div>
+    <label style="display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 10px; background: var(--fill); color: var(--fg3)">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="5"></circle><path d="M11 11l3.5 3.5"></path></svg>
+      <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Найти задачу</span>
+      <input type="search" placeholder="Задачи и беседы" style="flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--fg); outline: none">
+    </label>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="padding: 0 10px 4px; font-size: 11px; font-weight: 600; color: var(--fg3)">Задачи</div>
+      <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="2">
+        <button onClick="{{ t.pick }}" style="display: flex; flex-direction: column; gap: 2px; padding: 7px 10px; border-radius: 10px; background: {{ t.bg }}">
+          <span style="display: flex; align-items: center; gap: 6px">
+            <span style="flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ t.name }}</span>
+            <sc-if value="{{ t.hasBadge }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 6px; color: var(--critText); background: var(--critFill)">{{ t.badge }}</span>
+            </sc-if>
+          </span>
+          <span style="font-size: 12px; color: var(--fg2)">{{ t.meta }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="padding: 0 10px 4px; font-size: 11px; font-weight: 600; color: var(--fg3)">Кандидаты</div>
+      <sc-for list="{{ candidates }}" as="t" hint-placeholder-count="1">
+        <button onClick="{{ t.pick }}" style="display: flex; flex-direction: column; gap: 2px; padding: 7px 10px; border-radius: 10px; background: {{ t.bg }}">
+          <span style="font-weight: 600">{{ t.name }}</span>
+          <span style="font-size: 12px; color: var(--fg2)">{{ t.meta }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="flex: 1"></div>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px 2px; border-top: 0.5px solid var(--sep)">
+      <button style="display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 7px; background: var(--fill2); font-weight: 600">work <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg3)">⌘K</span></button>
+      <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--fg2)"><span style="width: 7px; height: 7px; border-radius: 4px; background: var(--ok)"></span>служба · индекс свежий</span>
+    </div>
+  </nav>
+
+  <main style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; padding: 6px 4px 0 18px; box-sizing: border-box">
+
+    <sc-if value="{{ isDiscount }}" hint-placeholder-val="{{ true }}">
+      <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 6px 0 14px">
+        <div style="flex: 1 1 320px; min-width: 0">
+          <h1 style="margin: 0; font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -0.01em">Двойная скидка в корзине</h1>
+          <div style="color: var(--fg2)">5 бесед · Claude Code и Codex · 3–15 октября · payments-api</div>
+        </div>
+        <div role="tablist" aria-label="Вид" style="display: flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--glass); box-shadow: var(--glassEdge)">
+          <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+            <button role="tab" onClick="{{ v.pick }}" style="height: 28px; padding: 0 14px; border-radius: 9px; font-weight: 600; background: {{ v.bg }}; color: {{ v.fg }}; box-shadow: {{ v.shadow }}">{{ v.label }}</button>
+          </sc-for>
+        </div>
+        <button onClick="{{ toggleRejected }}" aria-pressed="{{ rejectedPressed }}" style="display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 12px; background: var(--glass); box-shadow: var(--glassEdge); font-weight: 600">
+          <span style="width: 14px; height: 14px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; background: {{ rejectedBox }}">✓</span>Отклонённые ветки
+        </button>
+      </header>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 14px">
+        <span style="padding: 3px 10px; border-radius: 8px; background: var(--fill)">Основная линия <b>6 шагов</b></span>
+        <span style="padding: 3px 10px; border-radius: 8px; background: var(--fill)">Открытых рисков <b>4</b>, из них <b style="color: var(--critText)">1 critical</b></span>
+        <span style="padding: 3px 10px; border-radius: 8px; background: var(--fill)">Доказано цитатой <b>79 %</b> узлов</span>
+        <span style="padding: 3px 10px; border-radius: 8px; color: var(--highText); background: var(--highFill)">Не размечено: 35 реплик и одна беседа</span>
+      </div>
+
+      <div style="flex: 1; display: flex; flex-wrap: wrap; gap: 18px; min-height: 0">
+        <section aria-label="{{ viewLabel }}" style="flex: 999 1 460px; min-width: 0; padding-bottom: 18px">
+
+          <sc-if value="{{ isLine }}" hint-placeholder-val="{{ true }}">
+            <div style="overflow-x: auto; overflow-y: hidden; border-radius: 16px; background: var(--card); box-shadow: var(--cardEdge)">
+              <div style="position: relative; width: {{ mapW }}px; height: {{ mapH }}px; margin: 0 auto">
+                <svg width="{{ mapW }}" height="{{ mapH }}" viewBox="{{ viewBox }}" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+                  <path d="{{ rail1D }}" style="fill: none; stroke: {{ rail1Color }}; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55"></path>
+                  <path d="{{ rail2D }}" style="fill: none; stroke: {{ rail2Color }}; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55"></path>
+                  <path d="{{ rail3D }}" style="fill: none; stroke: {{ rail3Color }}; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55"></path>
+                  <path d="{{ rejectedD }}" style="fill: none; stroke: var(--line); stroke-width: 1.5; stroke-linecap: round"></path>
+                  <path d="{{ looseD }}" style="fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; stroke-linecap: round"></path>
+                  <path d="{{ openD }}" style="fill: none; stroke: var(--open); stroke-width: 1.5; stroke-dasharray: 4 4; stroke-linecap: round"></path>
+                  <path d="{{ mainD }}" style="fill: none; stroke: var(--fg); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round"></path>
+                </svg>
+
+                <div style="position: absolute; left: {{ start.left }}px; top: {{ start.top }}px; width: 320px">
+                  <div style="font-size: 11px; font-weight: 600; color: var(--fg3)">НАЧАЛО · c0 · 3 окт</div>
+                  <div style="font-weight: 600">«Почему скидка применяется дважды?»</div>
+                </div>
+
+                <sc-for list="{{ branchLabels }}" as="l" hint-placeholder-count="10">
+                  <div style="position: absolute; left: {{ l.left }}px; top: {{ l.top }}px; width: {{ l.width }}px; text-align: {{ l.align }}; font-size: 12px; line-height: 16px">
+                    <div style="font-weight: 600; color: {{ l.color }}">{{ l.title }}</div>
+                    <div style="color: var(--fg3)">{{ l.sub }}</div>
+                  </div>
+                </sc-for>
+
+                <sc-for list="{{ questions }}" as="q" hint-placeholder-count="6">
+                  <button onClick="{{ q.pick }}" aria-pressed="{{ q.pressed }}" style="position: absolute; left: {{ q.left }}px; top: {{ q.top }}px; display: flex; align-items: baseline; gap: 8px; padding: 3px 9px; border-radius: 9px; white-space: nowrap; background: {{ q.bg }}; box-shadow: {{ q.ring }}">
+                    <span style="font-size: 14px; font-weight: 700">{{ q.question }}</span>
+                    <span style="font-size: 12px; font-weight: 600; color: {{ q.color }}">{{ q.stateLabel }}</span>
+                    <sc-if value="{{ q.head }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 6px; color: var(--accentText); background: var(--sel)">HEAD</span>
+                    </sc-if>
+                  </button>
+                </sc-for>
+
+                <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="20">
+                  <button onClick="{{ n.pick }}" aria-label="{{ n.aria }}" style="position: absolute; left: {{ n.left }}px; top: {{ n.top }}px; width: {{ n.size }}px; height: {{ n.size }}px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: {{ n.font }}px; line-height: 1; font-weight: 700; color: {{ n.fg }}; background: {{ n.bg }}; box-shadow: {{ n.ring }}">{{ n.glyph }}</button>
+                </sc-for>
+
+                <sc-for list="{{ riskPins }}" as="r" hint-placeholder-count="5">
+                  <button onClick="{{ r.pick }}" aria-pressed="{{ r.pressed }}" style="position: absolute; left: {{ r.left }}px; top: {{ r.top }}px; max-width: 300px; display: flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 8px; white-space: nowrap; font-size: 12px; background: {{ r.bg }}">
+                    <span style="width: 7px; height: 7px; border-radius: 4px; flex: none; background: {{ r.color }}"></span>
+                    <span style="font-weight: 600; color: {{ r.text }}">{{ r.level }}</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis">{{ r.title }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12px; color: var(--fg2)">
+              <span><b style="color: var(--fg)">━</b> основная линия</span>
+              <span><b style="color: var(--fg3)">┄</b> отложено или брошено</span>
+              <span><b style="color: var(--open)">┄</b> ждёт решения</span>
+              <span><b style="color: var(--crit)">┃</b> открытый риск тянется по линии до HEAD</span>
+            </div>
+            <div style="margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: var(--fill); color: var(--fg2); display: flex; flex-direction: column; gap: 4px">
+              <span>Не размечено: «Скидка: продолжение по handoff» — 35 новых реплик, «QA: ретест корзины» — вся беседа.</span>
+              <span>Достроить: <code style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px; color: var(--fg)">crosskit tasks map "Двойная скидка в корзине" --build</code></span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isConvs }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <sc-for list="{{ convs }}" as="c" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: var(--card); box-shadow: var(--cardEdge)">
+                  <span aria-hidden="true" style="width: 30px; height: 30px; border-radius: 8px; flex: none; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; background: {{ c.toolColor }}">{{ c.mono }}</span>
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                    <span style="display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline">
+                      <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; color: var(--fg3)">{{ c.code }}</span>
+                      <span style="font-weight: 600">{{ c.name }}</span>
+                      <span style="color: var(--fg2)">{{ c.tool }} · {{ c.day }} · {{ c.replies }} реплик</span>
+                    </span>
+                    <span style="display: block; height: 5px; border-radius: 3px; background: var(--fill2); overflow: hidden"><span style="display: block; height: 5px; border-radius: 3px; width: {{ c.width }}; background: var(--ok)"></span></span>
+                    <span style="color: {{ c.statusColor }}">{{ c.status }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isRisks }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <sc-for list="{{ riskGroups }}" as="g" hint-placeholder-count="3">
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <h2 style="margin: 0; font-size: 12px; font-weight: 600; color: var(--fg3)">{{ g.title }}</h2>
+                  <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="2">
+                    <button onClick="{{ r.pick }}" aria-pressed="{{ r.pressed }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 11px; background: {{ r.bg }}; box-shadow: var(--cardEdge)">
+                      <span style="width: 8px; height: 8px; border-radius: 4px; flex: none; background: {{ r.color }}"></span>
+                      <span style="width: 58px; flex: none; font-weight: 600; color: {{ r.text }}">{{ r.level }}</span>
+                      <span style="flex: 1; min-width: 0">{{ r.title }}</span>
+                      <span style="color: var(--fg3); white-space: nowrap">{{ r.where }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </section>
+
+        <aside aria-label="Узел" style="flex: 1 1 320px; max-width: 380px; min-width: 280px; align-self: flex-start; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 16px; background: var(--card); box-shadow: var(--cardEdge)">
+          <sc-if value="{{ selIsStep }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 11px; font-weight: 600; color: var(--fg3)">РАЗВИЛКА · {{ sel.where }}</span>
+              <h2 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 700">{{ sel.question }}</h2>
+            </div>
+            <sc-for list="{{ sel.branches }}" as="br" hint-placeholder-count="2">
+              <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; border-bottom: 0.5px solid var(--sep)">
+                <span style="display: flex; gap: 8px; align-items: baseline">
+                  <span style="width: 14px; flex: none; text-align: center; font-weight: 700; color: {{ br.color }}">{{ br.mark }}</span>
+                  <span style="flex: 1; font-weight: 600">{{ br.option }}</span>
+                  <span style="font-size: 12px; font-weight: 600; color: {{ br.color }}">{{ br.label }}</span>
+                </span>
+                <span style="padding-left: 22px; color: var(--fg2)">{{ br.reason }}</span>
+                <figure style="margin: 0 0 0 22px; padding: 8px 10px; border-radius: 9px; background: var(--quote)">
+                  <blockquote style="margin: 0">«{{ br.quote }}»</blockquote>
+                  <figcaption style="margin-top: 4px; font-size: 12px; color: var(--fg2)">{{ br.who }} · реплика {{ br.reply }} · {{ br.conv }}</figcaption>
+                </figure>
+              </div>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ selIsRisk }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="display: flex; gap: 8px; align-items: center">
+                <span style="font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 6px; color: {{ risk.text }}; background: {{ risk.fill }}">{{ risk.level }}</span>
+                <span style="font-size: 12px; font-weight: 600; color: var(--fg2)">{{ risk.status }}</span>
+              </span>
+              <h2 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 700">{{ risk.title }}</h2>
+              <span style="color: var(--fg2)">{{ risk.note }}</span>
+            </div>
+            <sc-for list="{{ risk.sources }}" as="q" hint-placeholder-count="2">
+              <figure style="margin: 0; padding: 8px 10px; border-radius: 9px; background: var(--quote)">
+                <blockquote style="margin: 0">«{{ q.quote }}»</blockquote>
+                <figcaption style="margin-top: 4px; font-size: 12px; color: var(--fg2)">{{ q.who }} · реплика {{ q.reply }} · {{ q.conv }}</figcaption>
+              </figure>
+            </sc-for>
+          </sc-if>
+          <a href="#" style="display: flex; align-items: center; justify-content: center; height: 32px; border-radius: 10px; font-weight: 600; text-decoration: none; color: var(--accentText); background: var(--sel)">Открыть беседу в {{ openIn }}</a>
+        </aside>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px">
+        <div style="max-width: 520px; display: flex; flex-direction: column; gap: 14px">
+          <h1 style="margin: 0; font-size: 20px; line-height: 26px; font-weight: 700">Миграция платежей на v2</h1>
+          <p style="margin: 0; color: var(--fg2)">Задача подтверждена: 3 беседы, 412 реплик. Карта ещё не построена. Построение спрашивает модель о каждой реплике и тратит лимит подписки — на беседы такого размера около 3 $.</p>
+          <div style="padding: 10px 14px; border-radius: 12px; background: var(--fill)">
+            <code style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px">crosskit tasks map "Миграция платежей на v2" --build</code>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{ paymentConvs }}" as="c" hint-placeholder-count="3">
+              <span style="display: flex; gap: 10px; align-items: center">
+                <span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; background: {{ c.toolColor }}">{{ c.mono }}</span>
+                <span style="flex: 1">{{ c.name }}</span>
+                <span style="color: var(--fg3)">{{ c.meta }}</span>
+              </span>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCandidate }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px">
+        <div style="max-width: 520px; display: flex; flex-direction: column; gap: 14px">
+          <span style="font-size: 11px; font-weight: 600; color: var(--fg3)">КАНДИДАТ В ЗАДАЧИ</span>
+          <h1 style="margin: 0; font-size: 20px; line-height: 26px; font-weight: 700">Логи доставки в ClickHouse</h1>
+          <p style="margin: 0; color: var(--fg2)">Две беседы связаны сшивкой: вторая читает handoff-файл, который написала первая. Карта строится для подтверждённой задачи.</p>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span style="display: flex; gap: 10px; align-items: center"><span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; background: var(--claude)">C</span><span style="flex: 1">Логи доставки: схема таблиц</span><span style="color: var(--fg3)">21 окт</span></span>
+            <span style="display: flex; gap: 10px; align-items: center"><span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; background: var(--codex)">X</span><span style="flex: 1">Продолжи по handoff-logs.md</span><span style="color: var(--fg3)">22 окт</span></span>
+          </div>
+          <div style="padding: 10px 14px; border-radius: 12px; background: var(--fill)">
+            <code style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px">crosskit tasks confirm 7f3a --name "Логи доставки"</code>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { task: 'discount', view: 'line', sel: 's2', rejected: true };
+  }
+
+  theme(dark) {
+    if (dark) {
+      return {
+        bg: '#1c1c1f', side: 'rgba(44,44,48,0.92)', sideShadow: '0 0 0 0.5px rgba(255,255,255,0.08), 0 10px 30px rgba(0,0,0,0.35)',
+        fg: '#f2f2f4', fg2: 'rgba(242,242,244,0.72)', fg3: 'rgba(242,242,244,0.6)', sep: 'rgba(255,255,255,0.1)',
+        fill: 'rgba(255,255,255,0.06)', fill2: 'rgba(255,255,255,0.1)', card: '#26262a', cardEdge: '0 0 0 0.5px rgba(255,255,255,0.08)',
+        glass: 'rgba(255,255,255,0.07)', glassEdge: '0 0 0 0.5px rgba(255,255,255,0.12), 0 4px 14px rgba(0,0,0,0.25)', seg: 'rgba(255,255,255,0.16)',
+        sel: 'rgba(76,155,255,0.22)', accentText: '#7db6ff', quote: 'rgba(255,255,255,0.05)', line: 'rgba(242,242,244,0.28)',
+        ok: '#4cc96d', chosen: '#4cc96d', open: '#7db6ff', agent: '#ffa040', muted: 'rgba(242,242,244,0.6)',
+        crit: '#ff6961', critText: '#ff8a84', critFill: 'rgba(255,105,97,0.16)',
+        high: '#ffa040', highText: '#ffb066', highFill: 'rgba(255,160,64,0.14)',
+        med: '#e6c34a', medText: '#e6c34a', info: '#a2a2a8', infoText: '#b4b4ba',
+        claude: '#d97b55', codex: '#7d828d'
+      };
+    }
+    return {
+      bg: '#fbfbfd', side: 'rgba(240,240,244,0.94)', sideShadow: '0 0 0 0.5px rgba(0,0,0,0.08), 0 10px 30px rgba(0,0,0,0.06)',
+      fg: '#1c1c1e', fg2: 'rgba(28,28,30,0.7)', fg3: 'rgba(28,28,30,0.6)', sep: 'rgba(0,0,0,0.09)',
+      fill: 'rgba(0,0,0,0.04)', fill2: 'rgba(0,0,0,0.07)', card: '#ffffff', cardEdge: '0 0 0 0.5px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.04)',
+      glass: 'rgba(255,255,255,0.75)', glassEdge: '0 0 0 0.5px rgba(0,0,0,0.1), 0 4px 14px rgba(0,0,0,0.06)', seg: '#ffffff',
+      sel: 'rgba(10,100,216,0.12)', accentText: '#0a5cc4', quote: 'rgba(0,0,0,0.035)', line: 'rgba(28,28,30,0.25)',
+      ok: '#1e8a42', chosen: '#1e7d3a', open: '#0a5cc4', agent: '#a85200', muted: 'rgba(28,28,30,0.6)',
+      crit: '#d70015', critText: '#b0101b', critFill: 'rgba(215,0,21,0.09)',
+      high: '#c56a00', highText: '#a04f00', highFill: 'rgba(197,106,0,0.1)',
+      med: '#a37f00', medText: '#7f6300', info: '#8e8e93', infoText: '#5f5f64',
+      claude: '#c46a45', codex: '#4a4d55'
+    };
+  }
+
+  renderVals() {
+    const dark = this.props.dark === true || this.props.dark === 'true';
+    const T = this.theme(dark);
+    const s = this.state;
+    const pick = (patch) => () => this.setState(patch);
+    const themeVars = Object.keys(T).map((k) => '--' + k + ':' + T[k]).join(';');
+
+    const marks = { chosen: '✓', rejected: '✗', deferred: '○', open: '?', agent_default: 'ᵃ', abandoned: '⊘' };
+    const labels = { chosen: 'выбрал владелец', rejected: 'отклонено', deferred: 'отложено', open: 'ждёт решения', agent_default: 'решил агент', abandoned: 'брошено' };
+    const stateColor = { chosen: T.chosen, rejected: T.muted, deferred: T.muted, open: T.open, agent_default: T.agent, abandoned: T.muted };
+    const level = {
+      critical: { color: T.crit, text: T.critText, fill: T.critFill },
+      high: { color: T.high, text: T.highText, fill: T.highFill },
+      medium: { color: T.med, text: T.medText, fill: T.fill },
+      info: { color: T.info, text: T.infoText, fill: T.fill }
+    };
+    const statusLabel = { open: 'открыт', accepted: 'принят', resolved: 'закрыт' };
+
+    const convs = [
+      { code: 'c0', name: 'Почему скидка применяется дважды', tool: 'Claude Code', mono: 'C', day: '3 окт', replies: 84, through: 84, nodes: '2 развилки · 3 риска · доказано 84 %' },
+      { code: 'c1', name: 'Скидка: расчёт только в order.rs', tool: 'Claude Code', mono: 'C', day: '6 окт', replies: 212, through: 212, nodes: '4 развилки · 7 рисков · доказано 77 %' },
+      { code: 'c2', name: 'Частичный возврат и скидка', tool: 'Codex', mono: 'X', day: '9 окт', replies: 57, through: 57, nodes: '1 развилка · 3 риска · доказано 80 %' },
+      { code: 'c3', name: 'Скидка: продолжение по handoff', tool: 'Claude Code', mono: 'C', day: '14 окт', replies: 133, through: 98, nodes: '2 развилки · 2 риска · доказано 75 %' },
+      { code: 'c4', name: 'QA: ретест корзины', tool: 'Codex', mono: 'X', day: '15 окт', replies: 41, through: 0, nodes: '' }
+    ];
+    const convOf = {};
+    convs.forEach((c) => { convOf[c.code] = c; });
+    const convName = (code) => '«' + convOf[code].name + '» · ' + convOf[code].tool + ', ' + convOf[code].day;
+
+    const risks = [
+      { id: 'r1', step: 's2', level: 'critical', status: 'open', title: 'Частичный возврат не пересчитывает скидку', where: 'c1, c2, c3',
+        note: 'Поднимался в трёх беседах, ответа не было: уровень поднят с high до critical.',
+        sources: [
+          { who: 'Агент', conv: 'c1', reply: 63, quote: 'при частичном возврате скидка остаётся прежней' },
+          { who: 'Агент', conv: 'c2', reply: 14, quote: 'возврат одной позиции не трогает скидку заказа' },
+          { who: 'Агент', conv: 'c3', reply: 40, quote: 'частичный возврат всё ещё не пересчитан' }
+        ] },
+      { id: 'r5', step: 's2', level: 'medium', status: 'open', title: 'Допущение: промокоды не суммируются со скидкой', where: 'c0',
+        note: 'Агент предположил и не проверил; владелец не ответил.',
+        sources: [{ who: 'Агент', conv: 'c0', reply: 70, quote: 'предполагаю, что промокоды со скидкой не суммируются' }] },
+      { id: 'r3', step: 's3', level: 'high', status: 'open', title: 'Интеграционные тесты не запускались', where: 'c1',
+        note: 'Нет доступа к базе стенда; пересчёт проверен только юнит-тестами.',
+        sources: [{ who: 'Агент', conv: 'c1', reply: 118, quote: 'интеграционные тесты не запускал — нет доступа к базе стенда' }] },
+      { id: 'r2', step: 's3', level: 'critical', status: 'accepted', title: 'Скрипт пересчёта запущен без отдельного бэкапа', where: 'c1',
+        note: 'Владелец принял риск: бэкапом служит ночной снапшот.',
+        sources: [{ who: 'Владелец', conv: 'c1', reply: 152, quote: 'бэкап есть в ночном снапшоте, запускай' }] },
+      { id: 'r6', step: 's4', level: 'info', status: 'resolved', title: 'TODO: округление до копеек в order.rs', where: 'c1',
+        note: 'Закрыт в той же беседе.',
+        sources: [{ who: 'Агент', conv: 'c1', reply: 205, quote: 'округление добавил, TODO убрал' }] },
+      { id: 'r4', step: 's6', level: 'high', status: 'open', title: 'Токен стенда записан в .env.example', where: 'c3',
+        note: 'Файл в репозитории; кто видит токен — не выяснено.',
+        sources: [{ who: 'Агент', conv: 'c3', reply: 77, quote: 'положил токен стенда в .env.example, чтобы тесты подхватили' }] }
+    ];
+    const findings = [
+      { id: 'f1', level: 'high', status: 'open', title: 'Экспорт отчётов в соседнем сервисе падает на пустой дате', where: 'c2',
+        note: 'Находка вне задачи: к скидкам не относится.',
+        sources: [{ who: 'Агент', conv: 'c2', reply: 31, quote: 'кстати, экспорт отчётов падает на пустой дате' }] }
+    ];
+
+    const steps = [
+      { id: 's1', state: 'chosen', question: 'С чего начать?', branches: [
+        { state: 'chosen', option: 'Воспроизвести на копии данных', reason: 'без этого не видно, где скидка считается второй раз', who: 'Владелец', conv: 'c0', reply: 12, quote: 'давай сначала на данных, потом код' },
+        { state: 'rejected', option: 'Сразу править расчёт в корзине', reason: 'причина двойного счёта не найдена', who: 'Владелец', conv: 'c0', reply: 12, quote: 'править вслепую не будем' }
+      ] },
+      { id: 's2', state: 'chosen', question: 'Где считать скидку?', branches: [
+        { state: 'chosen', option: 'Только в order.rs, корзина показывает', reason: 'корзина показывает цену, а не считает её', who: 'Владелец', conv: 'c0', reply: 57, quote: 'пусть корзина только показывает, считаем в заказе' },
+        { state: 'rejected', option: 'Флаг «уже применено» в заказе', reason: 'ломает частичный возврат', who: 'Владелец', conv: 'c0', reply: 41, quote: 'флаг сломает частичный возврат, не надо' },
+        { state: 'deferred', option: 'Общий модуль расчёта цены', reason: 'вернуться после релиза', who: 'Владелец', conv: 'c1', reply: 8, quote: 'модуль цены потом, после релиза' }
+      ] },
+      { id: 's3', state: 'chosen', question: 'Как пересчитать открытые заказы?', branches: [
+        { state: 'chosen', option: 'Скрипт пересчёта через MR с ревью', reason: 'правки данных только с ревью', who: 'Владелец', conv: 'c1', reply: 140, quote: 'скрипт только через MR, ревью обязательно' },
+        { state: 'rejected', option: 'Поправить на проде вручную', reason: 'не воспроизводимо и без отката', who: 'Владелец', conv: 'c1', reply: 140, quote: 'руками на проде не трогаем' }
+      ] },
+      { id: 's4', state: 'agent_default', question: 'Где хранить историю скидок?', branches: [
+        { state: 'agent_default', option: 'Отдельная таблица discount_history', reason: 'владелец не ответил, агент выбрал сам', who: 'Агент', conv: 'c1', reply: 171, quote: 'раз ответа нет, заведу отдельную таблицу discount_history' },
+        { state: 'rejected', option: 'Поле JSON в заказе', reason: 'неудобно для отчётов', who: 'Агент', conv: 'c1', reply: 171, quote: 'JSON в заказе неудобен для отчётов' }
+      ] },
+      { id: 's5', state: 'abandoned', question: 'Кэшировать цену в корзине?', branches: [
+        { state: 'abandoned', option: 'Кэш цены на 5 минут', reason: 'владелец ответил про возвраты, к кэшу не вернулись', who: 'Агент', conv: 'c2', reply: 22, quote: 'можно кэшировать цену корзины на 5 минут?' }
+      ] },
+      { id: 's6', state: 'open', question: 'Как показывать скидку до оформления?', head: true, branches: [
+        { state: 'open', option: 'Предпросмотр через API заказа', reason: 'ждёт решения владельца', who: 'Агент', conv: 'c3', reply: 96, quote: 'могу сделать предпросмотр через API заказа' },
+        { state: 'open', option: 'Спросить у продакта', reason: 'ждёт решения владельца', who: 'Агент', conv: 'c3', reply: 96, quote: 'или уточнить у продакта, как показывать' }
+      ] }
+    ];
+
+    const riskRow = (r) => {
+      const lv = level[r.level];
+      const selected = s.sel === r.id;
+      return {
+        level: r.level, title: r.title, status: statusLabel[r.status], where: r.where,
+        color: lv.color, text: lv.text,
+        bg: selected ? T.sel : (r.status === 'open' ? lv.fill : T.fill),
+        pressed: selected ? 'true' : 'false',
+        pick: pick({ sel: r.id })
+      };
+    };
+    const stepIndex = {};
+    steps.forEach((st, i) => { stepIndex[st.id] = i; });
+    const laneRisks = risks.filter((r) => r.status === 'open' && (r.level === 'critical' || r.level === 'high'));
+
+    const stepRows = steps.map((st, i) => {
+      const selected = s.sel === st.id;
+      const shown = st.branches
+        .filter((b) => s.rejected || (b.state !== 'rejected' && b.state !== 'deferred'))
+        .map((b) => ({ mark: marks[b.state], color: stateColor[b.state], option: b.option, reason: b.reason,
+          fg: (b.state === 'rejected' || b.state === 'deferred' || b.state === 'abandoned') ? T.fg2 : T.fg }));
+      const seen = {};
+      const sources = [];
+      st.branches.forEach((b) => {
+        const key = b.conv + ' · ' + b.reply;
+        if (!seen[key]) { seen[key] = true; sources.push({ code: key, title: convName(b.conv) }); }
+      });
+      return {
+        question: st.question, stateLabel: labels[st.state], color: stateColor[st.state], head: !!st.head,
+        tail: i === steps.length - 1 ? 'transparent' : T.line,
+        bg: selected ? T.sel : 'transparent',
+        ring: selected ? '0 0 0 1px ' + T.accentText : 'none',
+        pressed: selected ? 'true' : 'false',
+        shown: shown, sources: sources,
+        lane: laneRisks.filter((r) => stepIndex[r.step] <= i).map((r) => ({ color: level[r.level].color, title: r.level + ': ' + r.title })),
+        risks: risks.filter((r) => r.step === st.id).map(riskRow),
+        pick: pick({ sel: st.id })
+      };
+    });
+
+    // The tree: a fork is a point, its branches grow out of it, and the lead branch — chosen by
+    // the owner or by the agent — carries the main line down to the next fork.
+    const mapW = 720, X0 = 310, STEP = 176;
+    const pt = (p) => p.x + ' ' + p.y;
+    const curve = (a, b) => 'M' + pt(a) + ' Q' + b.x + ' ' + a.y + ' ' + pt(b);
+    const line = (a, b) => 'M' + pt(a) + ' L' + pt(b);
+    const startPt = { x: X0 - 70, y: 46 };
+    let cx = X0, y = 132;
+    let mainD = curve(startPt, { x: cx, y: y });
+    let rejectedD = '', looseD = '', openD = '';
+    const nodes = [{ left: startPt.x - 7, top: startPt.y - 7, size: 14, bg: T.fg, ring: 'none', glyph: '', fg: T.fg, font: 10, aria: 'Начало задачи', pick: pick({ sel: 's1' }) }];
+    const branchLabels = [];
+    const questions = [];
+    const riskPins = [];
+    const spine = [];
+    const railStart = {};
+    const nodeLook = {
+      chosen: { size: 22, bg: T.chosen, fg: '#fff', ring: 'none', font: 12 },
+      agent_default: { size: 22, bg: T.agent, fg: '#fff', ring: 'none', font: 13 },
+      rejected: { size: 16, bg: T.fill2, fg: T.fg2, ring: '0 0 0 1px ' + T.line, font: 10 },
+      deferred: { size: 16, bg: T.card, fg: T.fg2, ring: '0 0 0 1px ' + T.line, font: 10 },
+      abandoned: { size: 16, bg: T.card, fg: T.fg2, ring: '0 0 0 1px ' + T.line, font: 11 },
+      open: { size: 18, bg: T.card, fg: T.open, ring: '0 0 0 1.5px ' + T.open, font: 11 }
+    };
+    const putNode = (p, b, st) => {
+      const look = nodeLook[b.state];
+      nodes.push({ left: p.x - look.size / 2, top: p.y - look.size / 2, size: look.size, bg: look.bg, fg: look.fg, font: look.font,
+        ring: s.sel === st.id && (b.state === 'chosen' || b.state === 'agent_default') ? '0 0 0 3px ' + T.sel : look.ring,
+        glyph: marks[b.state], aria: labels[b.state] + ': ' + b.option, pick: pick({ sel: st.id }) });
+    };
+    const putLabel = (p, b, toRight, size) => {
+      const gap = size / 2 + 8;
+      branchLabels.push({ left: toRight ? p.x + gap : p.x - gap - 210, top: p.y - 8, width: 210, align: toRight ? 'left' : 'right',
+        title: b.option, sub: b.reason, color: (b.state === 'chosen' || b.state === 'agent_default') ? T.fg : T.fg2 });
+    };
+    steps.forEach((st, i) => {
+      const fork = { x: cx, y: y };
+      const side = i % 2 === 0 ? 1 : -1;
+      const selected = s.sel === st.id;
+      spine.push(fork);
+      nodes.push({ left: fork.x - 5, top: fork.y - 5, size: 10, bg: T.fg, fg: T.fg, font: 8, glyph: '',
+        ring: selected ? '0 0 0 4px ' + T.sel : 'none', aria: 'Развилка: ' + st.question, pick: pick({ sel: st.id }) });
+      questions.push({ left: fork.x + 12, top: fork.y - 30, question: st.question, stateLabel: labels[st.state], color: stateColor[st.state],
+        head: !!st.head, bg: selected ? T.sel : T.card, ring: selected ? '0 0 0 1px ' + T.accentText : 'none',
+        pressed: selected ? 'true' : 'false', pick: pick({ sel: st.id }) });
+      const lead = st.branches.find((b) => b.state === 'chosen' || b.state === 'agent_default');
+      const others = st.branches.filter((b) => b !== lead && (s.rejected || (b.state !== 'rejected' && b.state !== 'deferred')));
+      const down = lead ? { x: cx + side * 72, y: y + 66 } : { x: cx, y: y + 66 };
+      if (lead) {
+        mainD += ' ' + curve(fork, down);
+        putNode(down, lead, st);
+        putLabel(down, lead, side > 0, 22);
+      } else if (!st.head) {
+        mainD += ' ' + line(fork, down);
+      }
+      others.forEach((b, k) => {
+        const away = lead ? -side : (k % 2 === 0 ? -side : side);
+        const row = lead ? k : Math.floor(k / 2);
+        const at = { x: cx + away * 100, y: y + 40 + row * 50 };
+        const edge = curve(fork, at);
+        if (b.state === 'rejected') rejectedD += ' ' + edge;
+        else if (b.state === 'open') openD += ' ' + edge;
+        else looseD += ' ' + edge;
+        putNode(at, b, st);
+        putLabel(at, b, away > 0, 16);
+      });
+      if (lead) spine.push(down);
+      railStart[st.id] = spine.length - 1;
+      const pinX = (lead ? down.x : cx) + 16;
+      risks.filter((r) => r.step === st.id).forEach((r, k) => {
+        riskPins.push(Object.assign(riskRow(r), { left: st.head ? cx - 150 : pinX, top: (st.head ? y + 112 : down.y + 36) + k * 26 }));
+      });
+      if (i < steps.length - 1) {
+        const next = { x: down.x, y: y + STEP };
+        mainD += ' ' + line(down, next);
+        cx = next.x;
+        y = next.y;
+      }
+    });
+    const endY = y + 150;
+    const mapH = endY + 20;
+    const railOf = (r, k) => {
+      const dx = -(12 + 6 * k);
+      const pts = spine.slice(railStart[r.step]);
+      const tail = pts[pts.length - 1];
+      return pts.concat([{ x: tail.x, y: endY - 30 }]).map((p, idx) => (idx === 0 ? 'M' : 'L') + (p.x + dx) + ' ' + p.y).join(' ');
+    };
+    const rails = laneRisks.map((r, k) => ({ d: railOf(r, k), color: level[r.level].color }));
+    const railAt = (k) => rails[k] || { d: 'M0 0', color: 'transparent' };
+
+    const allRisks = risks.concat(findings);
+    const selRisk = allRisks.find((r) => r.id === s.sel);
+    const selStep = steps.find((st) => st.id === s.sel) || (selRisk ? null : steps[1]);
+    const branchDetail = (b) => ({ mark: marks[b.state], label: labels[b.state], color: stateColor[b.state], option: b.option, reason: b.reason,
+      quote: b.quote, who: b.who, reply: b.reply, conv: convName(b.conv) });
+    const sel = selStep ? { question: selStep.question, where: 'шаг ' + (stepIndex[selStep.id] + 1) + ' из ' + steps.length, branches: selStep.branches.map(branchDetail) } : { question: '', where: '', branches: [] };
+    const risk = selRisk ? {
+      level: selRisk.level, status: statusLabel[selRisk.status], title: selRisk.title, note: selRisk.note,
+      text: level[selRisk.level].text, fill: level[selRisk.level].fill,
+      sources: selRisk.sources.map((q) => ({ quote: q.quote, who: q.who, reply: q.reply, conv: convName(q.conv) }))
+    } : { level: '', status: '', title: '', note: '', text: T.fg, fill: T.fill, sources: [] };
+    const firstConv = selRisk ? selRisk.sources[0].conv : (selStep ? selStep.branches[0].conv : 'c0');
+
+    const order = { critical: 0, high: 1, medium: 2, info: 3 };
+    const byLevel = (a, b) => order[a.level] - order[b.level];
+    const riskGroups = [
+      { title: 'ОТКРЫТЫЕ', items: risks.filter((r) => r.status === 'open').sort(byLevel).map(riskRow) },
+      { title: 'ПРИНЯТЫЕ И ЗАКРЫТЫЕ', items: risks.filter((r) => r.status !== 'open').sort(byLevel).map(riskRow) },
+      { title: 'НАХОДКИ ВНЕ ЗАДАЧИ', items: findings.map(riskRow) }
+    ];
+
+    const toolColor = (tool) => (tool === 'Codex' ? T.codex : T.claude);
+    const convRows = convs.map((c) => {
+      const all = c.through >= c.replies;
+      const none = c.through === 0;
+      return {
+        code: c.code, name: c.name, tool: c.tool, mono: c.mono, day: c.day, replies: c.replies, toolColor: toolColor(c.tool),
+        width: Math.round((c.through / c.replies) * 100) + '%',
+        status: none ? 'Не размечена' : (all ? 'Размечена вся · ' + c.nodes : 'Размечено ' + c.through + ' из ' + c.replies + ' · ' + (c.replies - c.through) + ' новых реплик · ' + c.nodes),
+        statusColor: all ? T.fg2 : T.highText
+      };
+    });
+
+    const views = [
+      { id: 'line', label: 'Основная линия' },
+      { id: 'convs', label: 'Беседы' },
+      { id: 'risks', label: 'Риски' }
+    ].map((v) => ({
+      label: v.label,
+      bg: s.view === v.id ? T.seg : 'transparent',
+      fg: s.view === v.id ? T.fg : T.fg2,
+      shadow: s.view === v.id ? '0 1px 3px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06)' : 'none',
+      pick: pick({ view: v.id })
+    }));
+
+    const taskRow = (t) => ({ name: t.name, meta: t.meta, hasBadge: !!t.badge, badge: t.badge || '',
+      bg: s.task === t.id ? T.sel : 'transparent', pick: pick({ task: t.id }) });
+
+    return {
+      themeVars: themeVars,
+      tasks: [
+        { id: 'discount', name: 'Двойная скидка в корзине', meta: '5 бесед · карта от 30 окт', badge: '1 critical' },
+        { id: 'payments', name: 'Миграция платежей на v2', meta: '3 беседы · карта не построена' }
+      ].map(taskRow),
+      candidates: [{ id: 'logs', name: 'Логи доставки в ClickHouse', meta: '2 беседы · общий handoff-файл' }].map(taskRow),
+      isDiscount: s.task === 'discount',
+      isPayments: s.task === 'payments',
+      isCandidate: s.task === 'logs',
+      views: views,
+      viewLabel: s.view === 'line' ? 'Основная линия' : (s.view === 'convs' ? 'Беседы' : 'Риски'),
+      isLine: s.view === 'line',
+      isConvs: s.view === 'convs',
+      isRisks: s.view === 'risks',
+      toggleRejected: () => this.setState({ rejected: !s.rejected }),
+      rejectedPressed: s.rejected ? 'true' : 'false',
+      rejectedBox: s.rejected ? T.accentText : T.fill2,
+      steps: stepRows,
+      mapW: mapW, mapH: mapH, viewBox: '0 0 ' + mapW + ' ' + mapH,
+      mainD: mainD, rejectedD: rejectedD || 'M0 0', looseD: looseD || 'M0 0', openD: openD || 'M0 0',
+      rail1D: railAt(0).d, rail1Color: railAt(0).color, rail2D: railAt(1).d, rail2Color: railAt(1).color, rail3D: railAt(2).d, rail3Color: railAt(2).color,
+      start: { left: startPt.x + 14, top: startPt.y - 22 },
+      nodes: nodes, branchLabels: branchLabels, questions: questions, riskPins: riskPins,
+      convs: convRows,
+      riskGroups: riskGroups,
+      selIsStep: !!selStep && !selRisk,
+      selIsRisk: !!selRisk,
+      sel: sel,
+      risk: risk,
+      openIn: convOf[firstConv].tool,
+      paymentConvs: [
+        { name: 'Платежи v2: контракт API', mono: 'C', toolColor: T.claude, meta: '188 реплик · 17 окт' },
+        { name: 'Миграция платёжных методов', mono: 'X', toolColor: T.codex, meta: '131 реплика · 20 окт' },
+        { name: 'Платежи v2: ретест вебхуков', mono: 'X', toolColor: T.codex, meta: '93 реплики · 24 окт' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CCB0000000000000000001 /* CrosskitKit in Frameworks */ = {isa = PBXBuildFile; productRef = CCB0000000000000000003 /* CrosskitKit */; };
+		CCB0000000000000000002 /* CrosskitKit in Frameworks */ = {isa = PBXBuildFile; productRef = CCB0000000000000000004 /* CrosskitKit */; };
+		CC1000000000000000001 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000001 /* main.swift */; };
+		CC1000000000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000002 /* AppDelegate.swift */; };
+		CC1000000000000000003 /* Launch.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000003 /* Launch.swift */; };
+		CC1000000000000000004 /* GlobalHotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000004 /* GlobalHotkey.swift */; };
+		CC1000000000000000005 /* PanelWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000005 /* PanelWindow.swift */; };
+		CC1000000000000000006 /* PanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000006 /* PanelController.swift */; };
+		CC1000000000000000007 /* FirstFrameProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000007 /* FirstFrameProbe.swift */; };
+		CC1000000000000000008 /* Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000008 /* Tokens.swift */; };
+		CC1000000000000000009 /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000009 /* Widgets.swift */; };
+		CC100000000000000000A /* ResultFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000A /* ResultFeed.swift */; };
+		CC100000000000000000B /* InventedFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000B /* InventedFeed.swift */; };
+		CC100000000000000000C /* EmptyFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000C /* EmptyFeed.swift */; };
+		CC100000000000000000D /* PanelContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000D /* PanelContent.swift */; };
+		CC100000000000000000E /* HeaderPieces.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000E /* HeaderPieces.swift */; };
+		CC100000000000000000F /* RowPieces.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000F /* RowPieces.swift */; };
+		CC1000000000000000010 /* FooterPieces.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000010 /* FooterPieces.swift */; };
+		CC1000000000000000011 /* GuidePieces.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000011 /* GuidePieces.swift */; };
+		CC1000000000000000099 /* KeyEquivalent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000099 /* KeyEquivalent.swift */; };
+		CC1000000000000000120 /* Canvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000120 /* Canvas.swift */; };
+		CC1000000000000000122 /* Canvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000120 /* Canvas.swift */; };
+		CC1000000000000000121 /* CanvasKeysTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000121 /* CanvasKeysTests.swift */; };
+		CC1000000000000000012 /* CoreAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000012 /* CoreAnswer.swift */; };
+		CC10000000000000000A3 /* ServiceSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC20000000000000000A3 /* ServiceSocket.swift */; };
+		CC10000000000000000A4 /* ServiceSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC20000000000000000A3 /* ServiceSocket.swift */; };
+		CC10000000000000000A5 /* ServiceSocketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC20000000000000000A5 /* ServiceSocketTests.swift */; };
+		CC10000000000000000A1 /* BusyRetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC20000000000000000A1 /* BusyRetry.swift */; };
+		CC10000000000000000A2 /* BusyRetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC20000000000000000A1 /* BusyRetry.swift */; };
+		CC1000000000000000013 /* CoreProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000013 /* CoreProcess.swift */; };
+		CC1000000000000000014 /* CoreFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000014 /* CoreFeed.swift */; };
+		CC1000000000000000015 /* AnswerOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000015 /* AnswerOrder.swift */; };
+		CC1000000000000000016 /* FailureWording.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000016 /* FailureWording.swift */; };
+		CC1000000000000000017 /* Opening.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000017 /* Opening.swift */; };
+		CC1000000000000000018 /* BridgeMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000018 /* BridgeMeter.swift */; };
+		CC1000000000000000019 /* BridgeReplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000019 /* BridgeReplay.swift */; };
+		CC100000000000000001A /* CoreAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000001A /* CoreAnswerTests.swift */; };
+		CC100000000000000001B /* AnswerOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000001B /* AnswerOrderTests.swift */; };
+		CC10000000000000000A0 /* BusyRetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC20000000000000000A0 /* BusyRetryTests.swift */; };
+		CC100000000000000001C /* ResultFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000000A /* ResultFeed.swift */; };
+		CC100000000000000001D /* CoreAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000012 /* CoreAnswer.swift */; };
+		CC100000000000000001E /* AnswerOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000015 /* AnswerOrder.swift */; };
+		CC100000000000000001F /* CoreProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200000000000000001F /* CoreProcessTests.swift */; };
+		CC1000000000000000020 /* CoreProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000013 /* CoreProcess.swift */; };
+		CC1000000000000000021 /* GraphAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000021 /* GraphAnswer.swift */; };
+		CC1000000000000000022 /* GraphSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000022 /* GraphSource.swift */; };
+		CC1000000000000000025 /* GraphWording.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000025 /* GraphWording.swift */; };
+		CC1000000000000000026 /* GraphScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000026 /* GraphScreen.swift */; };
+		CC1000000000000000027 /* GraphReplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000027 /* GraphReplay.swift */; };
+		CC1000000000000000028 /* GraphAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000028 /* GraphAnswerTests.swift */; };
+		CC100000000000000002A /* GraphAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000021 /* GraphAnswer.swift */; };
+		CC1000000000000000030 /* GraphPicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000030 /* GraphPicture.swift */; };
+		CC1000000000000000031 /* GraphPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000031 /* GraphPage.swift */; };
+		CC1000000000000000032 /* ProcessMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000032 /* ProcessMemory.swift */; };
+		CC1000000000000000033 /* GraphPictureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000033 /* GraphPictureTests.swift */; };
+		CC1000000000000000034 /* GraphPicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000030 /* GraphPicture.swift */; };
+		CC1000000000000000035 /* GraphWording.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000025 /* GraphWording.swift */; };
+		CC1000000000000000036 /* GraphPage in Resources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000036 /* GraphPage */; };
+		CC1000000000000000037 /* WindowSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000037 /* WindowSnapshot.swift */; };
+		CC1000000000000000040 /* KnowledgeAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000040 /* KnowledgeAnswer.swift */; };
+		CC1000000000000000050 /* KnowledgeAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000040 /* KnowledgeAnswer.swift */; };
+		CC1000000000000000041 /* KnowledgeSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000041 /* KnowledgeSource.swift */; };
+		CC1000000000000000042 /* KnowledgePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000042 /* KnowledgePicture.swift */; };
+		CC1000000000000000052 /* KnowledgePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000042 /* KnowledgePicture.swift */; };
+		CC1000000000000000043 /* KnowledgeWording.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000043 /* KnowledgeWording.swift */; };
+		CC1000000000000000053 /* KnowledgeWording.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000043 /* KnowledgeWording.swift */; };
+		CC1000000000000000044 /* KnowledgeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000044 /* KnowledgeScreen.swift */; };
+		CC1000000000000000055 /* KnowledgeAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000045 /* KnowledgeAnswerTests.swift */; };
+		CC1000000000000000056 /* KnowledgePictureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000046 /* KnowledgePictureTests.swift */; };
+		CC1000000000000000060 /* GestureProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2000000000000000060 /* GestureProbe.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		CC2000000000000000001 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		CC2000000000000000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		CC2000000000000000003 /* Launch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Launch.swift; sourceTree = "<group>"; };
+		CC2000000000000000004 /* GlobalHotkey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkey.swift; sourceTree = "<group>"; };
+		CC2000000000000000005 /* PanelWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelWindow.swift; sourceTree = "<group>"; };
+		CC2000000000000000006 /* PanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelController.swift; sourceTree = "<group>"; };
+		CC2000000000000000007 /* FirstFrameProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstFrameProbe.swift; sourceTree = "<group>"; };
+		CC2000000000000000008 /* Tokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokens.swift; sourceTree = "<group>"; };
+		CC2000000000000000009 /* Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
+		CC200000000000000000A /* ResultFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultFeed.swift; sourceTree = "<group>"; };
+		CC200000000000000000B /* InventedFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InventedFeed.swift; sourceTree = "<group>"; };
+		CC200000000000000000C /* EmptyFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyFeed.swift; sourceTree = "<group>"; };
+		CC200000000000000000D /* PanelContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelContent.swift; sourceTree = "<group>"; };
+		CC200000000000000000E /* HeaderPieces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderPieces.swift; sourceTree = "<group>"; };
+		CC200000000000000000F /* RowPieces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowPieces.swift; sourceTree = "<group>"; };
+		CC2000000000000000010 /* FooterPieces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterPieces.swift; sourceTree = "<group>"; };
+		CC2000000000000000011 /* GuidePieces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidePieces.swift; sourceTree = "<group>"; };
+		CC2000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CC2000000000000000000B /* CrosskitPanel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CrosskitPanel.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC2000000000000000099 /* KeyEquivalent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEquivalent.swift; sourceTree = "<group>"; };
+		CC2000000000000000120 /* Canvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Canvas.swift; sourceTree = "<group>"; };
+		CC2000000000000000121 /* CanvasKeysTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasKeysTests.swift; sourceTree = "<group>"; };
+		CC2000000000000000012 /* CoreAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreAnswer.swift; sourceTree = "<group>"; };
+		CC20000000000000000A3 /* ServiceSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSocket.swift; sourceTree = "<group>"; };
+		CC20000000000000000A5 /* ServiceSocketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSocketTests.swift; sourceTree = "<group>"; };
+		CC20000000000000000A1 /* BusyRetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusyRetry.swift; sourceTree = "<group>"; };
+		CC2000000000000000013 /* CoreProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreProcess.swift; sourceTree = "<group>"; };
+		CC2000000000000000014 /* CoreFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreFeed.swift; sourceTree = "<group>"; };
+		CC2000000000000000015 /* AnswerOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnswerOrder.swift; sourceTree = "<group>"; };
+		CC2000000000000000016 /* FailureWording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FailureWording.swift; sourceTree = "<group>"; };
+		CC2000000000000000017 /* Opening.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Opening.swift; sourceTree = "<group>"; };
+		CC2000000000000000018 /* BridgeMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeMeter.swift; sourceTree = "<group>"; };
+		CC2000000000000000019 /* BridgeReplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeReplay.swift; sourceTree = "<group>"; };
+		CC200000000000000001A /* CoreAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreAnswerTests.swift; sourceTree = "<group>"; };
+		CC200000000000000001B /* AnswerOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnswerOrderTests.swift; sourceTree = "<group>"; };
+		CC20000000000000000A0 /* BusyRetryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusyRetryTests.swift; sourceTree = "<group>"; };
+		CC200000000000000001C /* CrosskitPanelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CrosskitPanelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC200000000000000001F /* CoreProcessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreProcessTests.swift; sourceTree = "<group>"; };
+		CC2000000000000000021 /* GraphAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphAnswer.swift; sourceTree = "<group>"; };
+		CC2000000000000000022 /* GraphSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphSource.swift; sourceTree = "<group>"; };
+		CC2000000000000000025 /* GraphWording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphWording.swift; sourceTree = "<group>"; };
+		CC2000000000000000026 /* GraphScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphScreen.swift; sourceTree = "<group>"; };
+		CC2000000000000000027 /* GraphReplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphReplay.swift; sourceTree = "<group>"; };
+		CC2000000000000000028 /* GraphAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphAnswerTests.swift; sourceTree = "<group>"; };
+		CC2000000000000000030 /* GraphPicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphPicture.swift; sourceTree = "<group>"; };
+		CC2000000000000000031 /* GraphPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphPage.swift; sourceTree = "<group>"; };
+		CC2000000000000000032 /* ProcessMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMemory.swift; sourceTree = "<group>"; };
+		CC2000000000000000033 /* GraphPictureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphPictureTests.swift; sourceTree = "<group>"; };
+		CC2000000000000000036 /* GraphPage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = GraphPage; sourceTree = "<group>"; };
+		CC2000000000000000037 /* WindowSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowSnapshot.swift; sourceTree = "<group>"; };
+		CC2000000000000000040 /* KnowledgeAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAnswer.swift; sourceTree = "<group>"; };
+		CC2000000000000000041 /* KnowledgeSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeSource.swift; sourceTree = "<group>"; };
+		CC2000000000000000042 /* KnowledgePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgePicture.swift; sourceTree = "<group>"; };
+		CC2000000000000000043 /* KnowledgeWording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeWording.swift; sourceTree = "<group>"; };
+		CC2000000000000000044 /* KnowledgeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeScreen.swift; sourceTree = "<group>"; };
+		CC2000000000000000045 /* KnowledgeAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeAnswerTests.swift; sourceTree = "<group>"; };
+		CC2000000000000000046 /* KnowledgePictureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgePictureTests.swift; sourceTree = "<group>"; };
+		CC2000000000000000060 /* GestureProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureProbe.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CC30000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCB0000000000000000001 /* CrosskitKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC30000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCB0000000000000000002 /* CrosskitKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CC40000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				CC40000000000000000002 /* CrosskitPanel */,
+				CC40000000000000000007 /* CrosskitPanelTests */,
+				CC40000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CC40000000000000000002 /* CrosskitPanel */ = {
+			isa = PBXGroup;
+			children = (
+				CC2000000000000000001 /* main.swift */,
+				CC2000000000000000002 /* AppDelegate.swift */,
+				CC2000000000000000003 /* Launch.swift */,
+				CC2000000000000000004 /* GlobalHotkey.swift */,
+				CC2000000000000000005 /* PanelWindow.swift */,
+				CC2000000000000000006 /* PanelController.swift */,
+				CC2000000000000000007 /* FirstFrameProbe.swift */,
+				CC2000000000000000008 /* Tokens.swift */,
+				CC2000000000000000009 /* Widgets.swift */,
+				CC2000000000000000099 /* KeyEquivalent.swift */,
+				CC2000000000000000120 /* Canvas.swift */,
+				CC2000000000000000017 /* Opening.swift */,
+				CC40000000000000000004 /* Feed */,
+				CC40000000000000000006 /* Measure */,
+				CC40000000000000000005 /* View */,
+				CC2000000000000000036 /* GraphPage */,
+				CC2000000000000000000A /* Info.plist */,
+			);
+			path = CrosskitPanel;
+			sourceTree = "<group>";
+		};
+		CC40000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CC2000000000000000000B /* CrosskitPanel.app */,
+				CC200000000000000001C /* CrosskitPanelTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CC40000000000000000004 /* Feed */ = {
+			isa = PBXGroup;
+			children = (
+				CC200000000000000000A /* ResultFeed.swift */,
+				CC200000000000000000B /* InventedFeed.swift */,
+				CC200000000000000000C /* EmptyFeed.swift */,
+				CC2000000000000000014 /* CoreFeed.swift */,
+				CC2000000000000000013 /* CoreProcess.swift */,
+				CC20000000000000000A1 /* BusyRetry.swift */,
+				CC2000000000000000012 /* CoreAnswer.swift */,
+				CC20000000000000000A3 /* ServiceSocket.swift */,
+				CC2000000000000000015 /* AnswerOrder.swift */,
+				CC2000000000000000030 /* GraphPicture.swift */,
+				CC2000000000000000021 /* GraphAnswer.swift */,
+				CC2000000000000000022 /* GraphSource.swift */,
+				CC2000000000000000040 /* KnowledgeAnswer.swift */,
+				CC2000000000000000041 /* KnowledgeSource.swift */,
+				CC2000000000000000042 /* KnowledgePicture.swift */,
+			);
+			path = Feed;
+			sourceTree = "<group>";
+		};
+		CC40000000000000000005 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				CC200000000000000000D /* PanelContent.swift */,
+				CC200000000000000000E /* HeaderPieces.swift */,
+				CC200000000000000000F /* RowPieces.swift */,
+				CC2000000000000000010 /* FooterPieces.swift */,
+				CC2000000000000000011 /* GuidePieces.swift */,
+				CC2000000000000000016 /* FailureWording.swift */,
+				CC2000000000000000031 /* GraphPage.swift */,
+				CC2000000000000000025 /* GraphWording.swift */,
+				CC2000000000000000026 /* GraphScreen.swift */,
+				CC2000000000000000043 /* KnowledgeWording.swift */,
+				CC2000000000000000044 /* KnowledgeScreen.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		CC40000000000000000006 /* Measure */ = {
+			isa = PBXGroup;
+			children = (
+				CC2000000000000000018 /* BridgeMeter.swift */,
+				CC2000000000000000019 /* BridgeReplay.swift */,
+				CC2000000000000000037 /* WindowSnapshot.swift */,
+				CC2000000000000000032 /* ProcessMemory.swift */,
+				CC2000000000000000027 /* GraphReplay.swift */,
+				CC2000000000000000060 /* GestureProbe.swift */,
+			);
+			path = Measure;
+			sourceTree = "<group>";
+		};
+		CC40000000000000000007 /* CrosskitPanelTests */ = {
+			isa = PBXGroup;
+			children = (
+				CC200000000000000001A /* CoreAnswerTests.swift */,
+				CC200000000000000001B /* AnswerOrderTests.swift */,
+				CC20000000000000000A0 /* BusyRetryTests.swift */,
+				CC20000000000000000A5 /* ServiceSocketTests.swift */,
+				CC200000000000000001F /* CoreProcessTests.swift */,
+				CC2000000000000000033 /* GraphPictureTests.swift */,
+				CC2000000000000000028 /* GraphAnswerTests.swift */,
+				CC2000000000000000045 /* KnowledgeAnswerTests.swift */,
+				CC2000000000000000046 /* KnowledgePictureTests.swift */,
+				CC2000000000000000121 /* CanvasKeysTests.swift */,
+			);
+			path = CrosskitPanelTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CC50000000000000000001 /* CrosskitPanel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC60000000000000000002 /* Build configuration list for PBXNativeTarget "CrosskitPanel" */;
+			buildPhases = (
+				CC70000000000000000001 /* Sources */,
+				CC30000000000000000001 /* Frameworks */,
+				CC80000000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CrosskitPanel;
+			packageProductDependencies = (
+				CCB0000000000000000003 /* CrosskitKit */,
+			);
+			productName = CrosskitPanel;
+			productReference = CC2000000000000000000B /* CrosskitPanel.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CC50000000000000000002 /* CrosskitPanelTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC60000000000000000003 /* Build configuration list for PBXNativeTarget "CrosskitPanelTests" */;
+			buildPhases = (
+				CC70000000000000000002 /* Sources */,
+				CC30000000000000000002 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CrosskitPanelTests;
+			packageProductDependencies = (
+				CCB0000000000000000004 /* CrosskitKit */,
+			);
+			productName = CrosskitPanelTests;
+			productReference = CC200000000000000001C /* CrosskitPanelTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CC90000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					CC50000000000000000001 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					CC50000000000000000002 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+				};
+			};
+			buildConfigurationList = CC60000000000000000001 /* Build configuration list for PBXProject "CrosskitPanel" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ru;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ru,
+				Base,
+			);
+			mainGroup = CC40000000000000000001;
+			productRefGroup = CC40000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			packageReferences = (
+				CCB0000000000000000005 /* XCLocalSwiftPackageReference "../CrosskitKit" */,
+			);
+			targets = (
+				CC50000000000000000001 /* CrosskitPanel */,
+				CC50000000000000000002 /* CrosskitPanelTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CC80000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC1000000000000000036 /* GraphPage in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CC70000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC1000000000000000001 /* main.swift in Sources */,
+				CC1000000000000000002 /* AppDelegate.swift in Sources */,
+				CC1000000000000000003 /* Launch.swift in Sources */,
+				CC1000000000000000004 /* GlobalHotkey.swift in Sources */,
+				CC1000000000000000005 /* PanelWindow.swift in Sources */,
+				CC1000000000000000006 /* PanelController.swift in Sources */,
+				CC1000000000000000007 /* FirstFrameProbe.swift in Sources */,
+				CC1000000000000000008 /* Tokens.swift in Sources */,
+				CC1000000000000000009 /* Widgets.swift in Sources */,
+				CC100000000000000000A /* ResultFeed.swift in Sources */,
+				CC100000000000000000B /* InventedFeed.swift in Sources */,
+				CC100000000000000000C /* EmptyFeed.swift in Sources */,
+				CC100000000000000000D /* PanelContent.swift in Sources */,
+				CC100000000000000000E /* HeaderPieces.swift in Sources */,
+				CC100000000000000000F /* RowPieces.swift in Sources */,
+				CC1000000000000000010 /* FooterPieces.swift in Sources */,
+				CC1000000000000000011 /* GuidePieces.swift in Sources */,
+				CC1000000000000000099 /* KeyEquivalent.swift in Sources */,
+				CC1000000000000000120 /* Canvas.swift in Sources */,
+				CC1000000000000000012 /* CoreAnswer.swift in Sources */,
+				CC10000000000000000A3 /* ServiceSocket.swift in Sources */,
+				CC10000000000000000A1 /* BusyRetry.swift in Sources */,
+				CC1000000000000000013 /* CoreProcess.swift in Sources */,
+				CC1000000000000000014 /* CoreFeed.swift in Sources */,
+				CC1000000000000000015 /* AnswerOrder.swift in Sources */,
+				CC1000000000000000016 /* FailureWording.swift in Sources */,
+				CC1000000000000000017 /* Opening.swift in Sources */,
+				CC1000000000000000018 /* BridgeMeter.swift in Sources */,
+				CC1000000000000000019 /* BridgeReplay.swift in Sources */,
+				CC1000000000000000037 /* WindowSnapshot.swift in Sources */,
+				CC1000000000000000030 /* GraphPicture.swift in Sources */,
+				CC1000000000000000031 /* GraphPage.swift in Sources */,
+				CC1000000000000000032 /* ProcessMemory.swift in Sources */,
+				CC1000000000000000021 /* GraphAnswer.swift in Sources */,
+				CC1000000000000000022 /* GraphSource.swift in Sources */,
+				CC1000000000000000025 /* GraphWording.swift in Sources */,
+				CC1000000000000000026 /* GraphScreen.swift in Sources */,
+				CC1000000000000000027 /* GraphReplay.swift in Sources */,
+				CC1000000000000000060 /* GestureProbe.swift in Sources */,
+				CC1000000000000000040 /* KnowledgeAnswer.swift in Sources */,
+				CC1000000000000000041 /* KnowledgeSource.swift in Sources */,
+				CC1000000000000000042 /* KnowledgePicture.swift in Sources */,
+				CC1000000000000000043 /* KnowledgeWording.swift in Sources */,
+				CC1000000000000000044 /* KnowledgeScreen.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC70000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC100000000000000001A /* CoreAnswerTests.swift in Sources */,
+				CC100000000000000001B /* AnswerOrderTests.swift in Sources */,
+				CC10000000000000000A0 /* BusyRetryTests.swift in Sources */,
+				CC100000000000000001C /* ResultFeed.swift in Sources */,
+				CC100000000000000001D /* CoreAnswer.swift in Sources */,
+				CC10000000000000000A4 /* ServiceSocket.swift in Sources */,
+				CC10000000000000000A5 /* ServiceSocketTests.swift in Sources */,
+				CC10000000000000000A2 /* BusyRetry.swift in Sources */,
+				CC100000000000000001E /* AnswerOrder.swift in Sources */,
+				CC100000000000000001F /* CoreProcessTests.swift in Sources */,
+				CC1000000000000000020 /* CoreProcess.swift in Sources */,
+				CC1000000000000000033 /* GraphPictureTests.swift in Sources */,
+				CC1000000000000000034 /* GraphPicture.swift in Sources */,
+				CC1000000000000000035 /* GraphWording.swift in Sources */,
+				CC1000000000000000028 /* GraphAnswerTests.swift in Sources */,
+				CC100000000000000002A /* GraphAnswer.swift in Sources */,
+				CC1000000000000000050 /* KnowledgeAnswer.swift in Sources */,
+				CC1000000000000000052 /* KnowledgePicture.swift in Sources */,
+				CC1000000000000000122 /* Canvas.swift in Sources */,
+				CC1000000000000000053 /* KnowledgeWording.swift in Sources */,
+				CC1000000000000000055 /* KnowledgeAnswerTests.swift in Sources */,
+				CC1000000000000000056 /* KnowledgePictureTests.swift in Sources */,
+				CC1000000000000000121 /* CanvasKeysTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CCA0000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CCA0000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		CCA0000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CrosskitPanel/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.crosskit.panel;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Debug;
+		};
+		CCA0000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CrosskitPanel/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.crosskit.panel;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Release;
+		};
+		CCA0000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.crosskit.panel.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Debug;
+		};
+		CCA0000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.crosskit.panel.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CC60000000000000000001 /* Build configuration list for PBXProject "CrosskitPanel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCA0000000000000000001 /* Debug */,
+				CCA0000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC60000000000000000002 /* Build configuration list for PBXNativeTarget "CrosskitPanel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCA0000000000000000003 /* Debug */,
+				CCA0000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC60000000000000000003 /* Build configuration list for PBXNativeTarget "CrosskitPanelTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCA0000000000000000005 /* Debug */,
+				CCA0000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		CCB0000000000000000005 /* XCLocalSwiftPackageReference "../CrosskitKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../CrosskitKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CCB0000000000000000003 /* CrosskitKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CrosskitKit;
+		};
+		CCB0000000000000000004 /* CrosskitKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CrosskitKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = CC90000000000000000001 /* Project object */;
+}

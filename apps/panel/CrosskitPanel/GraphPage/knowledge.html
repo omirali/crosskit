@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<!-- Карта знаний (ADR 0048). Та же граница, что у графа окрестности (ADR 0046): скрипты только
+     из бандла, внешних источников нет, сети у страницы нет. Раскладка `cose` встроена в
+     Cytoscape.js — нового кода сторонних авторов страница не добавляет. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+<style>
+  /* Ни прокрутки, ни отскока страницы: жесты трекпада разбирает карта, а не документ. Отскок
+     показывал бы фон под страницей — светлую полосу поперёк прозрачного холста. */
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden;
+               overscroll-behavior: none; touch-action: none; }
+  #map { position: absolute; inset: 0; background: transparent; }
+</style>
+<script src="vendor/cytoscape.min.js"></script>
+<script src="camera.js"></script>
+<script src="knowledge.js"></script>
+</head>
+<body><div id="map"></div></body>
+</html>

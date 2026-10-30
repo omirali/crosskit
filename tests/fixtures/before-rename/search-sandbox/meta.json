@@ -1,0 +1,77 @@
+{
+  "index_settings": {
+    "docstore_compression": "lz4",
+    "docstore_blocksize": 16384
+  },
+  "segments": [
+    {
+      "segment_id": "838d7ef2-195d-4bb5-8c0c-4f7972818380",
+      "max_doc": 1,
+      "deletes": null
+    }
+  ],
+  "schema": [
+    {
+      "name": "chunk_id",
+      "type": "text",
+      "options": {
+        "stored": false,
+        "fast": true
+      }
+    },
+    {
+      "name": "file_id",
+      "type": "text",
+      "options": {
+        "indexing": {
+          "record": "basic",
+          "fieldnorms": true,
+          "tokenizer": "raw"
+        },
+        "stored": false,
+        "fast": true
+      }
+    },
+    {
+      "name": "source_language",
+      "type": "text",
+      "options": {
+        "indexing": {
+          "record": "basic",
+          "fieldnorms": true,
+          "tokenizer": "raw"
+        },
+        "stored": false,
+        "fast": false
+      }
+    },
+    {
+      "name": "text",
+      "type": "text",
+      "options": {
+        "indexing": {
+          "record": "position",
+          "fieldnorms": true,
+          "tokenizer": "crosscode-normalizing"
+        },
+        "stored": false,
+        "fast": false
+      }
+    },
+    {
+      "name": "conversation_name_prefix",
+      "type": "text",
+      "options": {
+        "indexing": {
+          "record": "position",
+          "fieldnorms": true,
+          "tokenizer": "crosscode-prefix"
+        },
+        "stored": false,
+        "fast": false
+      }
+    }
+  ],
+  "opstamp": 2,
+  "payload": "fields=chunk_id,file_id,source_language,text,conversation_name_prefix;suffixes=1;tokenizer=simple-lowercase/1+prefix-5/1;normalizations=ru/1,en/1"
+}

@@ -1,0 +1,37 @@
+# Сборка Rust: гигабайты, пересоздаётся из исходников.
+/target/
+
+# Отладочные и бенчмарочные артефакты, которые оставляют прогоны.
+*.lbug
+*.lbug.wal
+*.lbug.wal.aside-*
+/bench/
+/report.txt
+
+# Локальная конфигурация и данные запуска.
+/config.toml
+/data/
+# Поисковые индексы, которые оставил запуск из корня репозитория.
+/search-*/
+
+# Набор вопросов к чатам владельца: в нём настоящие пути и имена бесед. В репозиторий не идёт,
+# пока владелец не решит его судьбу (правило 00-core); замер берёт его из каталога,
+# который называет CROSSKIT_SEARCH_QUALITY_DIR.
+tests/fixtures/search-quality/chats-questions.txt
+
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+.swiftpm/
+*.moved-aside
+
+# Сборка Swift-пакета приложений (ADR 0058).
+apps/CrosskitKit/.build/
+
+# The graph written by the build before the rename, kept as the test of that boundary.
+!tests/fixtures/before-rename/*.lbug

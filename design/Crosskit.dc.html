@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:#e8e8eb;} a{color:#0a64d8;text-decoration:none;} a:hover{color:#074aa3;text-decoration:underline;}</style>
+</helmet>
+<div style="{{ accentVars }}">
+<div style="width:1880px;box-sizing:border-box;padding:80px 80px 140px;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,sans-serif;color:#1c1c1e;display:flex;flex-direction:column;gap:100px;-webkit-font-smoothing:antialiased;">
+
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:900px;">
+    <div style="font-size:13px;color:rgba(28,28,30,0.55);font-family:'SF Mono',ui-monospace,Menlo,monospace;">Crosskit · macOS · UI v1</div>
+    <div style="font-size:44px;line-height:50px;font-weight:700;letter-spacing:-0.02em;">Поиск по чатам с ИИ и файлам</div>
+    <div style="font-size:16px;line-height:24px;color:rgba(28,28,30,0.7);text-wrap:pretty;">Плавающая панель 760 pt вместо Spotlight: запрос, выдача с источником у каждой строки и граф окрестности выделенного результата. Ниже — главный экран в двух темах, восемь состояний, компоненты, токены и список самостоятельных решений.</div>
+  </div>
+
+  <section data-screen-label="01 Главный экран" style="display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;align-items:baseline;gap:14px;"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:14px;color:rgba(28,28,30,0.45);">01</span><span style="font-size:28px;font-weight:700;letter-spacing:-0.01em;">Главный экран</span><span style="font-size:14px;color:rgba(28,28,30,0.6);">Выдача по «маркер политика», выделена первая беседа, граф в режиме «Файлы». Клик по узлу графа меняет строку-детали.</span></div>
+    <div style="display:flex;gap:40px;align-items:flex-start;">
+      <div style="--bg:rgba(247,247,249,0.82);--bg-solid:#f7f7f9;--fg:#1c1c1e;--fg2:rgba(28,28,30,0.68);--fg3:rgba(28,28,30,0.48);--sep:rgba(0,0,0,0.08);--sep2:rgba(0,0,0,0.14);--fill:rgba(0,0,0,0.035);--fill2:rgba(0,0,0,0.07);--inv:#ffffff;--accent:var(--sys-accent-l,#007aff);--sel:color-mix(in srgb,var(--accent) 13%,transparent);--mark:rgba(255,196,0,0.36);--ok:#1e9e48;--warn:#c56a00;--edge:rgba(28,28,30,0.28);--graph:rgba(255,255,255,0.45);--t-claude:#c46a45;--t-codex:#4a4d55;--t-cursor:#7b5cd6;--t-chatgpt:#2e9a78;--n-conv:#3f63d9;--n-msg:#6e7178;--n-file:#1f8fa3;--n-proj:#c98a12;--n-topic:#c2447e;--shadow:0 0 0 0.5px rgba(0,0,0,0.16),0 22px 60px rgba(0,0,0,0.20),0 4px 14px rgba(0,0,0,0.08);--desk:#d3d7de;--desk-a:#b3c1da;--desk-b:#e4cab6;color-scheme:light;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(28,28,30,0.6);">Светлая</div>
+        <div style="position:relative;width:880px;box-sizing:border-box;padding:56px 60px 64px;border-radius:14px;overflow:hidden;background:var(--desk);">
+          <div style="position:absolute;left:-120px;top:-160px;width:520px;height:520px;border-radius:50%;background:var(--desk-a);"></div>
+          <div style="position:absolute;right:-140px;bottom:-180px;width:560px;height:560px;border-radius:50%;background:var(--desk-b);"></div>
+          <div style="position:relative;"><dc-import name="CCWindow" state="main" hint-size="760px,760px"></dc-import></div>
+        </div>
+      </div>
+      <div style="--bg:rgba(36,36,40,0.80);--bg-solid:#26262a;--fg:#f2f2f5;--fg2:rgba(242,242,245,0.68);--fg3:rgba(242,242,245,0.46);--sep:rgba(255,255,255,0.08);--sep2:rgba(255,255,255,0.15);--fill:rgba(255,255,255,0.045);--fill2:rgba(255,255,255,0.10);--inv:#1c1c1e;--accent:var(--sys-accent-d,#0a84ff);--sel:color-mix(in srgb,var(--accent) 26%,transparent);--mark:rgba(255,204,0,0.30);--ok:#34c759;--warn:#ff9f0a;--edge:rgba(242,242,245,0.28);--graph:rgba(0,0,0,0.14);--t-claude:#d97b55;--t-codex:#7d828d;--t-cursor:#9b82ec;--t-chatgpt:#3fb68f;--n-conv:#6d8cf0;--n-msg:#a2a5ad;--n-file:#39b3c6;--n-proj:#e0a531;--n-topic:#e0679d;--shadow:0 0 0 0.5px rgba(255,255,255,0.14),0 22px 60px rgba(0,0,0,0.55),0 4px 14px rgba(0,0,0,0.3);--desk:#16171b;--desk-a:#28324c;--desk-b:#3b2b27;color-scheme:dark;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(28,28,30,0.6);">Тёмная</div>
+        <div style="position:relative;width:880px;box-sizing:border-box;padding:56px 60px 64px;border-radius:14px;overflow:hidden;background:var(--desk);">
+          <div style="position:absolute;left:-120px;top:-160px;width:520px;height:520px;border-radius:50%;background:var(--desk-a);"></div>
+          <div style="position:absolute;right:-140px;bottom:-180px;width:560px;height:560px;border-radius:50%;background:var(--desk-b);"></div>
+          <div style="position:relative;"><dc-import name="CCWindow" state="main" hint-size="760px,760px"></dc-import></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="02 Состояния" style="display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;align-items:baseline;gap:14px;"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:14px;color:rgba(28,28,30,0.45);">02</span><span style="font-size:28px;font-weight:700;letter-spacing:-0.01em;">Состояния</span><span style="font-size:14px;color:rgba(28,28,30,0.6);">Тему этого раздела можно переключить в Tweaks.</span></div>
+    <sc-if value="{{ statesLight }}">
+      <div style="--bg:rgba(247,247,249,0.82);--bg-solid:#f7f7f9;--fg:#1c1c1e;--fg2:rgba(28,28,30,0.68);--fg3:rgba(28,28,30,0.48);--sep:rgba(0,0,0,0.08);--sep2:rgba(0,0,0,0.14);--fill:rgba(0,0,0,0.035);--fill2:rgba(0,0,0,0.07);--inv:#ffffff;--accent:var(--sys-accent-l,#007aff);--sel:color-mix(in srgb,var(--accent) 13%,transparent);--mark:rgba(255,196,0,0.36);--ok:#1e9e48;--warn:#c56a00;--edge:rgba(28,28,30,0.28);--graph:rgba(255,255,255,0.45);--t-claude:#c46a45;--t-codex:#4a4d55;--t-cursor:#7b5cd6;--t-chatgpt:#2e9a78;--n-conv:#3f63d9;--n-msg:#6e7178;--n-file:#1f8fa3;--n-proj:#c98a12;--n-topic:#c2447e;--shadow:0 0 0 0.5px rgba(0,0,0,0.16),0 22px 60px rgba(0,0,0,0.20),0 4px 14px rgba(0,0,0,0.08);--desk:#d3d7de;--desk-a:#b3c1da;--desk-b:#e4cab6;color-scheme:light;display:flex;flex-wrap:wrap;gap:56px 40px;align-items:flex-start;">
+        <sc-for list="{{ states }}" as="s" hint-placeholder-count="8">
+          <div style="display:flex;flex-direction:column;gap:12px;width:880px;">
+            <div style="display:flex;gap:12px;align-items:baseline;"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#1c1c1e;color:#fff;font-size:12px;font-weight:700;">{{ s.n }}</span><div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:17px;font-weight:600;">{{ s.title }}</span><span style="font-size:13px;line-height:19px;color:rgba(28,28,30,0.62);">{{ s.desc }}</span></div></div>
+            <div style="position:relative;width:880px;box-sizing:border-box;padding:48px 60px 56px;border-radius:14px;overflow:hidden;background:var(--desk);">
+              <div style="position:absolute;left:-120px;top:-160px;width:520px;height:520px;border-radius:50%;background:var(--desk-a);"></div>
+              <div style="position:absolute;right:-140px;bottom:-180px;width:560px;height:560px;border-radius:50%;background:var(--desk-b);"></div>
+              <div style="position:relative;"><dc-import name="CCWindow" state="{{ s.state }}" hint-size="760px,480px"></dc-import></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ statesDark }}">
+      <div style="--bg:rgba(36,36,40,0.80);--bg-solid:#26262a;--fg:#f2f2f5;--fg2:rgba(242,242,245,0.68);--fg3:rgba(242,242,245,0.46);--sep:rgba(255,255,255,0.08);--sep2:rgba(255,255,255,0.15);--fill:rgba(255,255,255,0.045);--fill2:rgba(255,255,255,0.10);--inv:#1c1c1e;--accent:var(--sys-accent-d,#0a84ff);--sel:color-mix(in srgb,var(--accent) 26%,transparent);--mark:rgba(255,204,0,0.30);--ok:#34c759;--warn:#ff9f0a;--edge:rgba(242,242,245,0.28);--graph:rgba(0,0,0,0.14);--t-claude:#d97b55;--t-codex:#7d828d;--t-cursor:#9b82ec;--t-chatgpt:#3fb68f;--n-conv:#6d8cf0;--n-msg:#a2a5ad;--n-file:#39b3c6;--n-proj:#e0a531;--n-topic:#e0679d;--shadow:0 0 0 0.5px rgba(255,255,255,0.14),0 22px 60px rgba(0,0,0,0.55),0 4px 14px rgba(0,0,0,0.3);--desk:#16171b;--desk-a:#28324c;--desk-b:#3b2b27;color-scheme:dark;display:flex;flex-wrap:wrap;gap:56px 40px;align-items:flex-start;">
+        <sc-for list="{{ states }}" as="s" hint-placeholder-count="8">
+          <div style="display:flex;flex-direction:column;gap:12px;width:880px;">
+            <div style="display:flex;gap:12px;align-items:baseline;"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#1c1c1e;color:#fff;font-size:12px;font-weight:700;">{{ s.n }}</span><div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:17px;font-weight:600;color:#1c1c1e;">{{ s.title }}</span><span style="font-size:13px;line-height:19px;color:rgba(28,28,30,0.62);">{{ s.desc }}</span></div></div>
+            <div style="position:relative;width:880px;box-sizing:border-box;padding:48px 60px 56px;border-radius:14px;overflow:hidden;background:var(--desk);">
+              <div style="position:absolute;left:-120px;top:-160px;width:520px;height:520px;border-radius:50%;background:var(--desk-a);"></div>
+              <div style="position:absolute;right:-140px;bottom:-180px;width:560px;height:560px;border-radius:50%;background:var(--desk-b);"></div>
+              <div style="position:relative;"><dc-import name="CCWindow" state="{{ s.state }}" hint-size="760px,480px"></dc-import></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </section>
+
+  <section data-screen-label="03 Компоненты" style="display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;align-items:baseline;gap:14px;"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:14px;color:rgba(28,28,30,0.45);">03</span><span style="font-size:28px;font-weight:700;letter-spacing:-0.01em;">Компоненты</span></div>
+    <div style="display:flex;gap:40px;align-items:flex-start;">
+      <div style="--bg:rgba(247,247,249,0.82);--bg-solid:#f7f7f9;--fg:#1c1c1e;--fg2:rgba(28,28,30,0.68);--fg3:rgba(28,28,30,0.48);--sep:rgba(0,0,0,0.08);--sep2:rgba(0,0,0,0.14);--fill:rgba(0,0,0,0.035);--fill2:rgba(0,0,0,0.07);--inv:#ffffff;--accent:var(--sys-accent-l,#007aff);--sel:color-mix(in srgb,var(--accent) 13%,transparent);--mark:rgba(255,196,0,0.36);--ok:#1e9e48;--warn:#c56a00;--edge:rgba(28,28,30,0.28);--graph:rgba(255,255,255,0.45);--t-claude:#c46a45;--t-codex:#4a4d55;--t-cursor:#7b5cd6;--t-chatgpt:#2e9a78;--n-conv:#3f63d9;--n-msg:#6e7178;--n-file:#1f8fa3;--n-proj:#c98a12;--n-topic:#c2447e;--shadow:0 0 0 0.5px rgba(0,0,0,0.16),0 12px 32px rgba(0,0,0,0.16);--desk:#dfe1e6;color-scheme:light;">
+        <dc-import name="CCComponents" hint-size="860px,1200px"></dc-import>
+      </div>
+      <div style="--bg:rgba(36,36,40,0.80);--bg-solid:#26262a;--fg:#f2f2f5;--fg2:rgba(242,242,245,0.68);--fg3:rgba(242,242,245,0.46);--sep:rgba(255,255,255,0.08);--sep2:rgba(255,255,255,0.15);--fill:rgba(255,255,255,0.045);--fill2:rgba(255,255,255,0.10);--inv:#1c1c1e;--accent:var(--sys-accent-d,#0a84ff);--sel:color-mix(in srgb,var(--accent) 26%,transparent);--mark:rgba(255,204,0,0.30);--ok:#34c759;--warn:#ff9f0a;--edge:rgba(242,242,245,0.28);--graph:rgba(0,0,0,0.14);--t-claude:#d97b55;--t-codex:#7d828d;--t-cursor:#9b82ec;--t-chatgpt:#3fb68f;--n-conv:#6d8cf0;--n-msg:#a2a5ad;--n-file:#39b3c6;--n-proj:#e0a531;--n-topic:#e0679d;--shadow:0 0 0 0.5px rgba(255,255,255,0.14),0 12px 32px rgba(0,0,0,0.5);--desk:#1a1b1f;color-scheme:dark;">
+        <dc-import name="CCComponents" hint-size="860px,1200px"></dc-import>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="04 Токены" style="display:flex;flex-direction:column;gap:28px;">
+    <div style="display:flex;align-items:baseline;gap:14px;"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:14px;color:rgba(28,28,30,0.45);">04</span><span style="font-size:28px;font-weight:700;letter-spacing:-0.01em;">Токены</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:start;">
+      <div style="display:flex;flex-direction:column;padding:24px;border-radius:14px;background:#fff;">
+        <div style="display:grid;grid-template-columns:150px 110px 110px minmax(0,1fr);gap:12px;padding:0 0 10px;font-size:11px;font-weight:600;color:rgba(28,28,30,0.5);border-bottom:1px solid rgba(0,0,0,0.08);"><span>Цвет</span><span>Светлая</span><span>Тёмная</span><span>Где</span></div>
+        <sc-for list="{{ colors }}" as="c" hint-placeholder-count="12">
+          <div style="display:grid;grid-template-columns:150px 110px 110px minmax(0,1fr);gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:12px;">
+            <span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:11.5px;">{{ c.name }}</span>
+            <span style="display:flex;align-items:center;gap:8px;"><span style="width:28px;height:20px;border-radius:5px;background:{{ c.l }};box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);"></span><span style="font-size:10.5px;color:rgba(28,28,30,0.55);font-family:'SF Mono',ui-monospace,Menlo,monospace;">{{ c.lt }}</span></span>
+            <span style="display:flex;align-items:center;gap:8px;"><span style="width:28px;height:20px;border-radius:5px;background:#26262a;display:flex;align-items:center;justify-content:center;"><span style="width:28px;height:20px;border-radius:5px;background:{{ c.d }};box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);"></span></span><span style="font-size:10.5px;color:rgba(28,28,30,0.55);font-family:'SF Mono',ui-monospace,Menlo,monospace;">{{ c.dt }}</span></span>
+            <span style="color:rgba(28,28,30,0.7);">{{ c.use }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div style="display:flex;flex-direction:column;gap:4px;padding:24px;border-radius:14px;background:#fff;">
+          <div style="font-size:11px;font-weight:600;color:rgba(28,28,30,0.5);padding-bottom:8px;">Типографика · SF Pro (системная), SF Mono для синтаксиса и ID</div>
+          <sc-for list="{{ type }}" as="t" hint-placeholder-count="7">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.05);">
+              <span style="font-size:{{ t.size }};font-weight:{{ t.w }};font-family:{{ t.ff }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ t.sample }}</span>
+              <span style="font-size:11px;color:rgba(28,28,30,0.6);font-family:'SF Mono',ui-monospace,Menlo,monospace;">{{ t.spec }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div style="display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:14px;background:#fff;">
+            <div style="font-size:11px;font-weight:600;color:rgba(28,28,30,0.5);">Отступы</div>
+            <sc-for list="{{ space }}" as="p" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:10px;font-size:11.5px;"><span style="width:{{ p.w }};height:10px;border-radius:2px;background:#3f63d9;"></span><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;">{{ p.v }}</span><span style="color:rgba(28,28,30,0.55);">{{ p.use }}</span></div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:14px;background:#fff;">
+            <div style="font-size:11px;font-weight:600;color:rgba(28,28,30,0.5);">Радиусы</div>
+            <sc-for list="{{ radii }}" as="r" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:10px;font-size:11.5px;"><span style="width:28px;height:20px;box-sizing:border-box;border:1.5px solid #1c1c1e;border-radius:{{ r.v }};"></span><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;">{{ r.v }}</span><span style="color:rgba(28,28,30,0.55);">{{ r.use }}</span></div></sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:14px;background:#fff;">
+          <div style="font-size:11px;font-weight:600;color:rgba(28,28,30,0.5);">Тени и материал</div>
+          <div style="font-size:12px;line-height:18px;color:rgba(28,28,30,0.75);font-family:'SF Mono',ui-monospace,Menlo,monospace;">окно, светлая: 0 0 0 .5px rgba(0,0,0,.16), 0 22px 60px rgba(0,0,0,.20), 0 4px 14px rgba(0,0,0,.08)<br>окно, тёмная: 0 0 0 .5px rgba(255,255,255,.14), 0 22px 60px rgba(0,0,0,.55), 0 4px 14px rgba(0,0,0,.30)<br>материал: backdrop-filter blur(40px) saturate(180%)<br>меню контекста: 0 0 0 .5px, 0 12px 32px — та же пара, мягче</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="05 Решения" style="display:flex;flex-direction:column;gap:20px;max-width:1100px;">
+    <div style="display:flex;align-items:baseline;gap:14px;"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:14px;color:rgba(28,28,30,0.45);">05</span><span style="font-size:28px;font-weight:700;letter-spacing:-0.01em;">Решения, которые я принял сам</span><span style="font-size:14px;color:rgba(28,28,30,0.6);">Каждое можно отменить отдельно.</span></div>
+    <ol style="margin:0;padding:24px 24px 24px 48px;border-radius:14px;background:#fff;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:21px;color:rgba(28,28,30,0.85);">
+      <li>Иконки инструментов — временные монограммы CC, Cx, Cu, GP на цветной плашке. Настоящие логотипы подставить после согласования. Имя инструмента дополнительно написано в мета-строке каждой беседы.</li>
+      <li>Первая строка выдачи выделяется автоматически. Это только обновляет граф — ничего не открывается.</li>
+      <li>Граф строится после паузы в наборе (~250 мс). Во время набора вместо него — тонкая полоса «построится после паузы».</li>
+      <li>Счётчики «скрыто политикой» и «нет на диске» и кнопка «Показать ещё» закреплены под списком, а не в конце прокрутки — числа видны всегда.</li>
+      <li>Файлы missing: первые показаны в выдаче с пометкой, остальные свёрнуты и посчитаны в футере. Во время прохода индекса это число — «уточняется».</li>
+      <li>Первичное действие для файла — «Открыть» в приложении по умолчанию. Для missing оно недоступно, вторичное ⌘⏎ показывает последнюю версию из индекса.</li>
+      <li>Клик по узлу в макете выделяет узел, подсвечивает его связи и меняет строку-детали. Перестройка окрестности вокруг нового центра не нарисована.</li>
+      <li>Режимы графа: «Файлы» — беседа, сообщения со ссылками на файлы, проект и тема как контекст; «Знания» — проекты и темы; «Происхождение» — цепочка сообщение → файл. Нарисован только «Файлы».</li>
+      <li>«Ничего не найдено» предлагает три шага: снять фильтр, искать любое из слов (⌥⏎ — новая клавиша), повторить в другом контексте — как отдельный поиск, без смешивания выдач.</li>
+      <li>Подсказки синтаксиса в пустом окне (проект:, тема:, "фраза") — предположение; опираются только на существующие поля.</li>
+      <li>При свёрнутом графе ⇥ разворачивает его и ставит фокус внутрь. Свёрнутое окно ниже на ~290 pt, список не растягивается.</li>
+      <li>Первый запуск — одна панель в самом окне, без мастера. ChatGPT без файла экспорта показан как неподключённый источник, а не как ошибка.</li>
+      <li>Индикатор индекса различается формой: точка — свежий, разомкнутое кольцо — проход, треугольник — отстал.</li>
+      <li>Ошибка открытия — встроенная плашка под строкой, не модальное окно. ⌘C копирует ID сессии — это чтение, данные не меняются.</li>
+      <li>Акцент следует системному акценту macOS. В Tweaks — синий, фиолетовый и графит для проверки.</li>
+      <li>Роли сообщений в графе подписаны как в данных — user / assistant.</li>
+    </ol>
+  </section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Синий&quot;,&quot;Фиолетовый&quot;,&quot;Графит&quot;],&quot;default&quot;:&quot;Синий&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;statesTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Светлая&quot;,&quot;Тёмная&quot;],&quot;default&quot;:&quot;Светлая&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const acc = { 'Синий': ['#007aff', '#0a84ff'], 'Фиолетовый': ['#8944ab', '#a550a7'], 'Графит': ['#6e6e73', '#98989d'] }[this.props.accent ?? 'Синий'] || ['#007aff', '#0a84ff'];
+    const dark = (this.props.statesTheme ?? 'Светлая') === 'Тёмная';
+    const states = [
+      ['1', 'empty', 'Пустое окно сразу после вызова', 'Недавние чаты и подсказки. Ничего не выделено, пока не нажата ↓.'],
+      ['2', 'typing', 'Набор запроса', 'Выдача обновляется по мере ввода. Граф ждёт паузы.'],
+      ['3', 'main', 'Выдача с выделенной строкой и живым графом', 'То же, что главный экран: окрестность выделенной беседы, глубина 2.'],
+      ['4', 'noresults', 'Ничего не найдено', 'Три следующих шага, выбираются ↑↓ и ⏎. Счётчик политики виден и здесь.'],
+      ['5', 'firstrun', 'Контекст не настроен · индекс пуст', 'Одна панель: отметить источники и начать проход.'],
+      ['6', 'indexing', 'Идёт индексация', 'Тонкий прогресс под строкой запроса. Выдача работает, по файлам неполная.'],
+      ['7', 'openfail', 'Открытие чата не удалось', 'Сессия не найдена в Cursor. Вариант «инструмент не установлен» — в компонентах.'],
+      ['8', 'collapsed', 'Граф свёрнут', 'Окно без графа: список, счётчики и одна строка графа.']
+    ].map(([n, state, title, desc]) => ({ n, state, title, desc }));
+    const C = (name, l, lt, d, dt, use) => ({ name, l, lt, d, dt, use });
+    const colors = [
+      C('--bg', 'rgba(247,247,249,0.82)', 'F7F7F9 · 82%', 'rgba(36,36,40,0.80)', '242428 · 80%', 'материал окна'),
+      C('--fg', '#1c1c1e', '1C1C1E', '#f2f2f5', 'F2F2F5', 'имена, заголовки'),
+      C('--fg2', 'rgba(28,28,30,0.68)', 'fg · 68%', 'rgba(242,242,245,0.68)', 'fg · 68%', 'фрагменты'),
+      C('--fg3', 'rgba(28,28,30,0.48)', 'fg · 48%', 'rgba(242,242,245,0.46)', 'fg · 46%', 'мета, каталог пути'),
+      C('--fill2', 'rgba(0,0,0,0.07)', '000 · 7%', 'rgba(255,255,255,0.10)', 'FFF · 10%', 'чипы, клавиши'),
+      C('--accent', acc[0], 'системный', acc[1], 'системный', 'первичное действие, прогресс'),
+      C('--sel', 'rgba(0,122,255,0.13)', 'accent · 13%', 'rgba(10,132,255,0.26)', 'accent · 26%', 'выделенная строка'),
+      C('--mark', 'rgba(255,196,0,0.36)', 'FFC400 · 36%', 'rgba(255,204,0,0.30)', 'FFCC00 · 30%', 'совпавшие слова'),
+      C('--ok', '#1e9e48', '1E9E48', '#34c759', '34C759', 'файл present · точка'),
+      C('--warn', '#c56a00', 'C56A00', '#ff9f0a', 'FF9F0A', 'missing · штрих, ошибки'),
+      C('--t-claude', '#c46a45', 'C46A45', '#d97b55', 'D97B55', 'Claude Code · CC'),
+      C('--t-codex', '#4a4d55', '4A4D55', '#7d828d', '7D828D', 'Codex · Cx'),
+      C('--t-cursor', '#7b5cd6', '7B5CD6', '#9b82ec', '9B82EC', 'Cursor · Cu'),
+      C('--t-chatgpt', '#2e9a78', '2E9A78', '#3fb68f', '3FB68F', 'ChatGPT · GP'),
+      C('--n-conv', '#3f63d9', '3F63D9', '#6d8cf0', '6D8CF0', 'Беседа · скруглённый блок'),
+      C('--n-msg', '#6e7178', '6E7178', '#a2a5ad', 'A2A5AD', 'Сообщение · полый круг'),
+      C('--n-file', '#1f8fa3', '1F8FA3', '#39b3c6', '39B3C6', 'Файл · квадрат'),
+      C('--n-proj', '#c98a12', 'C98A12', '#e0a531', 'E0A531', 'Проект · ромб'),
+      C('--n-topic', '#c2447e', 'C2447E', '#e0679d', 'E0679D', 'Тема · полая пилюля')
+    ];
+    const sys = "-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif";
+    const mono = "'SF Mono',ui-monospace,Menlo,monospace";
+    const type = [
+      { sample: 'маркер политика', size: '22px', w: 400, ff: sys, spec: 'Запрос · 22/28 · 400' },
+      { sample: 'Контекст work ещё не настроен', size: '17px', w: 600, ff: sys, spec: 'Заголовок состояния · 17 · 600' },
+      { sample: 'Почему сверка помечала 727 локаций missing', size: '13.5px', w: 600, ff: sys, spec: 'Название строки · 13.5/18 · 600' },
+      { sample: '…каталог с маркером пропускался на уровне обхода…', size: '12.5px', w: 400, ff: sys, spec: 'Фрагмент · 12.5/17 · 400' },
+      { sample: 'crosskit · 3 дня назад · 42 сообщения', size: '11.5px', w: 400, ff: sys, spec: 'Мета · 11.5/18 · 400' },
+      { sample: 'содержит сообщение · ссылается на файл', size: '9.5px', w: 400, ff: sys, spec: 'Подпись связи · 9.5' },
+      { sample: 'проект:crosscode  7f3a…c21', size: '12px', w: 400, ff: mono, spec: 'Mono · 12 / 11' }
+    ];
+    const space = [['4', 'зазор внутри чипа'], ['6', 'между чипами'], ['8', 'поля списка'], ['12', 'иконка → текст'], ['16', 'поля окна'], ['24', 'пустые состояния']].map(([v, use]) => ({ v: v + 'px', w: (Number(v) * 3) + 'px', use }));
+    const radii = [['16px', 'окно'], ['10px', 'строка, карточка'], ['9px', 'узел-беседа'], ['7px', 'кнопка, плашка'], ['6px', 'чип фильтра'], ['5px', 'клавиша']].map(([v, use]) => ({ v, use }));
+    return { accentVars: { '--sys-accent-l': acc[0], '--sys-accent-d': acc[1] }, statesLight: !dark, statesDark: dark, states, colors, type, space, radii };
+  }
+}
+</script>
+</body>
+</html>

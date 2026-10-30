@@ -1,0 +1,14 @@
+{
+  "files.watcherExclude": {
+    "**/target/**": true,
+    "**/*.lbug*": true
+  },
+  "search.exclude": {
+    "**/target": true,
+    "**/*.lbug*": true
+  },
+  "files.exclude": {
+    "**/target": true
+  },
+  "rust-analyzer.files.excludeDirs": ["target"]
+}

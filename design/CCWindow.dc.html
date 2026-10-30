@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;width:760px;border-radius:16px;background:var(--bg);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);box-shadow:var(--shadow);overflow:hidden;color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,sans-serif;-webkit-font-smoothing:antialiased;">
+  <div style="position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px 12px;">
+    <div style="display:flex;align-items:center;gap:7px;height:30px;padding:0 5px 0 10px;border-radius:8px;background:var(--fill2);flex-shrink:0;">
+      <span style="font-size:13px;font-weight:600;">{{ ctx }}</span>
+      <sc-if value="{{ ctxSub }}"><span style="font-size:11.5px;color:var(--warn);">{{ ctxSub }}</span></sc-if>
+      <svg width="9" height="9" viewBox="0 0 10 10"><path d="M2 3.5 L5 6.5 L8 3.5" style="fill:none;stroke:var(--fg2);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+      <span style="display:inline-flex;align-items:center;justify-content:center;height:20px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:10.5px;">⌘K</span>
+    </div>
+    <div style="flex:1;min-width:0;display:flex;align-items:center;font-size:22px;line-height:28px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;">
+      <sc-if value="{{ hasQuery }}"><span>{{ q }}</span><span style="width:2px;height:24px;margin-left:1px;border-radius:1px;background:var(--accent);"></span></sc-if>
+      <sc-if value="{{ noQuery }}"><span style="width:2px;height:24px;margin-right:2px;border-radius:1px;background:var(--accent);"></span><span style="color:var(--fg3);">{{ placeholder }}</span></sc-if>
+    </div>
+    <sc-if value="{{ idxOk }}"><div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--fg3);white-space:nowrap;"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok);"></span>индекс свежий</div></sc-if>
+    <sc-if value="{{ idxPass }}"><div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--fg2);white-space:nowrap;"><span style="width:10px;height:10px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--accent);border-right-color:transparent;"></span>проход · 61%</div></sc-if>
+    <sc-if value="{{ idxStale }}"><div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--warn);white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9.5,9 0.5,9" style="fill:var(--warn);"></polygon></svg>отстал на 2 ч</div></sc-if>
+    <sc-if value="{{ idxEmpty }}"><div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--fg3);white-space:nowrap;"><span style="width:8px;height:8px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--fg3);"></span>индекс пуст</div></sc-if>
+    <sc-if value="{{ isIndexing }}"><div style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--fill2);"><div style="width:61%;height:2px;background:var(--accent);"></div></div></sc-if>
+  </div>
+
+  <sc-if value="{{ showFilters }}">
+    <div style="display:flex;align-items:center;gap:4px;padding:0 16px 10px;">
+      <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:6px;background:{{ f.bg }};color:{{ f.fg }};font-size:12px;font-weight:500;white-space:nowrap;">{{ f.label }}<span style="font-size:10.5px;opacity:0.6;">{{ f.key }}</span></div></sc-for>
+      <div style="width:1px;height:16px;margin:0 8px;background:var(--sep2);"></div>
+      <sc-for list="{{ sources }}" as="s" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:5px;height:24px;padding:0 8px 0 5px;box-sizing:border-box;border-radius:6px;border:1px solid var(--sep2);color:var(--fg2);font-size:12px;white-space:nowrap;margin-right:2px;"><span style="width:14px;height:14px;border-radius:4px;background:{{ s.color }};color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ s.mono }}</span>{{ s.label }}</div></sc-for>
+    </div>
+  </sc-if>
+  <div style="height:1px;background:var(--sep);"></div>
+
+  <sc-if value="{{ hasList }}">
+    <div style="max-height:{{ listH }};overflow:auto;padding:4px 8px 8px;">
+      <sc-if value="{{ isIndexing }}"><div style="display:flex;align-items:center;gap:10px;margin:6px 2px 2px;padding:8px 12px;border-radius:9px;background:var(--fill);font-size:12px;line-height:16px;color:var(--fg2);"><span style="width:10px;height:10px;flex-shrink:0;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--accent);border-right-color:transparent;"></span><span><span style="color:var(--fg);font-weight:600;">Идёт проход индекса.</span> Файлы: 292 400 из 480 000 · чаты: готово. Выдача по файлам пока неполная.</span></div></sc-if>
+      <sc-if value="{{ hasChats }}">
+        <div style="display:flex;align-items:baseline;gap:8px;padding:10px 10px 4px;font-size:11.5px;"><span style="font-weight:600;color:var(--fg2);">{{ chatsHead }}</span><span style="color:var(--fg3);">{{ chatsCount }}</span><span style="flex:1;"></span><span style="color:var(--accent);font-weight:500;">{{ chatsMore }}</span></div>
+        <sc-for list="{{ chats }}" as="c" hint-placeholder-count="3">
+          <dc-import name="CCChatRow" item="{{ c }}" selected="{{ c.sel }}" hint-size="100%,66px"></dc-import>
+          <sc-if value="{{ c.err }}">
+            <div style="display:flex;gap:10px;margin:4px 10px 8px 50px;padding:10px 12px;border-radius:10px;border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 7%,transparent);">
+              <svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0;margin-top:1px;"><polygon points="7,1 13.5,12.5 0.5,12.5" style="fill:var(--warn);"></polygon><rect x="6.25" y="5" width="1.5" height="4" style="fill:#fff;"></rect><rect x="6.25" y="10" width="1.5" height="1.5" style="fill:#fff;"></rect></svg>
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <div style="font-size:12.5px;font-weight:600;">Не удалось открыть в Cursor: сессия не найдена</div>
+                <div style="font-size:12px;line-height:17px;color:var(--fg2);text-wrap:pretty;">Cursor не знает сессию <span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:11px;">7f3a…c21</span>. В индексе Crosskit беседа есть, последнее сообщение — 12 сен. Возможно, её удалили или перенесли в другое рабочее пространство.</div>
+                <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:4px;font-size:11.5px;color:var(--fg);">
+                  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:11px;">⌘⏎</span>Показать беседу здесь</span>
+                  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:11px;">⌘C</span>Скопировать ID сессии</span>
+                  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:11px;">⏎</span>Повторить</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ hasFiles }}">
+        <div style="display:flex;align-items:baseline;gap:8px;padding:12px 10px 4px;font-size:11.5px;"><span style="font-weight:600;color:var(--fg2);">Файлы</span><span style="color:var(--fg3);">{{ filesCount }}</span><span style="flex:1;"></span><span style="color:var(--accent);font-weight:500;">{{ filesMore }}</span></div>
+        <sc-for list="{{ files }}" as="f" hint-placeholder-count="3"><dc-import name="CCFileRow" item="{{ f }}" selected="{{ f.sel }}" hint-size="100%,66px"></dc-import></sc-for>
+      </sc-if>
+      <sc-if value="{{ isEmpty }}">
+        <div style="padding:12px 10px 4px;font-size:11.5px;font-weight:600;color:var(--fg2);">Подсказки</div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:2px 10px 8px;">
+          <div style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:var(--fill);"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;">проект:crosscode</span><span style="font-size:11.5px;color:var(--fg3);">только беседы и файлы проекта</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:var(--fill);"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;">тема:платежи</span><span style="font-size:11.5px;color:var(--fg3);">по метке, которую поставила модель</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px;background:var(--fill);"><span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;">"точная фраза"</span><span style="font-size:11.5px;color:var(--fg3);">совпадение целиком, по порядку</span></div>
+        </div>
+        <div style="padding:4px 10px 6px;font-size:11.5px;color:var(--fg3);">Ищем в work: 26 репозиториев · 480 000 файлов · 468 бесед</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isNoRes }}">
+    <div style="display:flex;flex-direction:column;gap:6px;padding:26px 26px 14px;">
+      <div style="font-size:16px;font-weight:600;">В контексте work по запросу «reconcile ledger v3» ничего нет</div>
+      <div style="font-size:12.5px;line-height:18px;color:var(--fg2);">Искали только в чатах: 468 бесед из Claude Code, Codex, Cursor и ChatGPT. Индекс отстал на 2 часа — самые свежие беседы могли ещё не попасть.</div>
+    </div>
+    <div style="padding:0 8px 10px;">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:8px 10px;border-radius:10px;background:{{ st.bg }};">
+          <div style="width:28px;height:28px;border-radius:7px;background:var(--fill2);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--fg2);">{{ st.glyph }}</div>
+          <div style="display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-size:13px;font-weight:600;">{{ st.title }}</span><span style="font-size:11.5px;color:var(--fg3);">{{ st.sub }}</span></div>
+          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:5px;background:{{ st.kbg }};color:{{ st.kfg }};font-size:11px;font-weight:500;">{{ st.key }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isFirst }}">
+    <div style="display:flex;flex-direction:column;gap:6px;padding:22px 26px 10px;">
+      <div style="font-size:17px;font-weight:600;">Контекст work ещё не настроен</div>
+      <div style="max-width:600px;font-size:12.5px;line-height:18px;color:var(--fg2);text-wrap:pretty;">Crosskit только читает: папки и истории чатов индексируются на этом Mac. Отметьте, что входит в work, — остальное в этот контекст не попадёт.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;padding:4px 14px 6px;">
+      <sc-for list="{{ setup }}" as="u" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:16px 24px minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:8px 10px;border-radius:9px;background:{{ u.bg }};">
+          <sc-if value="{{ u.on }}"><span style="width:16px;height:16px;border-radius:5px;background:var(--accent);display:flex;align-items:center;justify-content:center;"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5.2 L4.2 7.3 L8 2.8" style="fill:none;stroke:#fff;stroke-width:1.6px;stroke-linecap:round;stroke-linejoin:round;"></path></svg></span></sc-if>
+          <sc-if value="{{ u.off }}"><span style="width:16px;height:16px;box-sizing:border-box;border-radius:5px;border:1.5px solid var(--sep2);"></span></sc-if>
+          <span style="width:24px;height:24px;border-radius:6px;background:{{ u.color }};color:{{ u.mfg }};font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ u.mono }}</span>
+          <div style="display:flex;flex-direction:column;gap:1px;min-width:0;"><span style="font-size:13px;font-weight:600;">{{ u.title }}</span><span style="font-size:11.5px;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ u.sub }}</span></div>
+          <span style="font-size:11.5px;color:{{ u.sfg }};white-space:nowrap;">{{ u.status }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 16px 16px 26px;">
+      <span style="flex:1;font-size:11.5px;color:var(--fg3);">Искать можно сразу — выдача дополняется по ходу прохода.</span>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 6px 0 12px;border-radius:7px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;">Начать индексацию<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:5px;background:rgba(255,255,255,0.22);font-size:11px;">⏎</span></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasCounters }}">
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 18px;border-top:1px solid var(--sep);font-size:11.5px;color:var(--fg3);white-space:nowrap;">
+      <sc-if value="{{ cnt.more }}"><div style="display:flex;align-items:center;height:22px;padding:0 9px;border-radius:6px;background:var(--fill2);color:var(--fg);font-weight:500;">Показать ещё 20</div><span>{{ cnt.page }}</span></sc-if>
+      <span style="flex:1;"></span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;box-sizing:border-box;border-radius:2px;border:1.5px solid var(--fg3);"></span>Скрыто политикой приватности:<span style="color:var(--fg);font-weight:600;">{{ cnt.policy }}</span></span>
+      <span>·</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--warn);"></span>Нет на диске, свёрнуто:<span style="color:var(--fg);font-weight:600;">{{ cnt.missing }}</span></span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ graphFull }}"><dc-import name="CCGraph" hint-size="100%,290px"></dc-import></sc-if>
+  <sc-if value="{{ graphBar }}">
+    <div style="display:flex;align-items:center;gap:10px;height:36px;padding:0 16px;border-top:1px solid var(--sep);background:var(--graph);font-size:12px;color:var(--fg2);white-space:nowrap;">
+      <span style="font-weight:600;color:var(--fg);">Граф</span><span style="color:var(--fg3);overflow:hidden;text-overflow:ellipsis;">{{ bar.t }}</span><span style="flex:1;"></span>
+      <sc-if value="{{ bar.a }}"><span style="display:flex;align-items:center;gap:5px;font-size:11px;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:5px;background:var(--fill2);font-size:11px;">⇥</span>{{ bar.a }}</span><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 6.5 L5 3.5 L8 6.5" style="fill:none;stroke:var(--fg2);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;"></path></svg></sc-if>
+    </div>
+  </sc-if>
+
+  <div style="display:flex;align-items:center;gap:14px;height:30px;padding:0 16px;border-top:1px solid var(--sep);background:var(--fill);font-size:11px;color:var(--fg3);white-space:nowrap;">
+    <sc-for list="{{ keys }}" as="k" hint-placeholder-count="4"><span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:5px;background:var(--fill2);box-shadow:inset 0 -1px 0 var(--sep2);color:var(--fg2);font-size:11px;font-weight:500;">{{ k.k }}</span>{{ k.t }}</span></sc-for>
+    <span style="flex:1;"></span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;justify-content:center;height:18px;padding:0 5px;border-radius:5px;background:var(--fill2);box-shadow:inset 0 -1px 0 var(--sep2);color:var(--fg2);font-size:11px;font-weight:500;">esc</span>Закрыть</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:800,&quot;height&quot;:760},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;main&quot;,&quot;empty&quot;,&quot;typing&quot;,&quot;noresults&quot;,&quot;firstrun&quot;,&quot;indexing&quot;,&quot;openfail&quot;,&quot;collapsed&quot;],&quot;default&quot;:&quot;main&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const S = this.props.state || 'main';
+    const c1 = { tool: 'claude', title: 'Почему сверка помечала 727 локаций missing', snippet: '…каталог с [маркером] пропускался на уровне обхода, и сверка читала молчание…', project: 'crosscode', when: '3 дня назад', count: '42 сообщения', topic: 'индексация' };
+    const c2 = { tool: 'cursor', title: 'Walker: .ccignore и вложенные репозитории', snippet: '…если [маркер] лежит глубже корня, правило [политики] наследуется вниз по дереву…', project: 'crosscode', when: '5 дней назад', count: '23 сообщения', topic: 'индексация' };
+    const c3 = { tool: 'codex', title: 'Policy engine: порядок правил', snippet: '…[маркер] обхода превращаем в правило [политики] с приоритетом выше пользовательских…', project: 'crosscode', when: '2 недели назад', count: '11 сообщений', topic: 'политика доступа' };
+    const c4 = { tool: 'chatgpt', title: 'Как назвать сущность пропуска в ADR', snippet: '…«[маркер]» звучит как файл, а в ADR нам нужна [политика] и причина пропуска…', project: 'crosscode', when: '3 недели назад', count: '8 сообщений', topic: 'документация' };
+    const plain = o => ({ ...o, snippet: o.snippet.replace(/[\[\]]/g, '') });
+    const pay = { tool: 'codex', title: 'Retry policy for payment webhook', snippet: '…exponential backoff, но идемпотентность ключа мы так и не закрыли…', project: 'payments-api', when: '2 недели назад', count: '17 сообщений', topic: 'платежи' };
+    const f1 = { status: 'present', dir: '~/Projects/crosscode/docs/adr/', name: '0027-marker-as-policy-rule.md', snippet: 'Пропуск обхода — это правило [политики], а не отдельная сущность', matched: 'маркер, политика', project: 'crosscode', when: '3 дня назад', topic: 'индексация' };
+    const f2 = { status: 'present', dir: '~/Projects/crosscode/src/index/', name: 'walker.rs', snippet: '// [маркер] обхода — частный случай правила [политики], см. ADR-0027', matched: 'маркер, политика', project: 'crosscode', when: '3 дня назад', topic: 'индексация' };
+    const f3 = { status: 'missing', dir: '~/Projects/crosscode/notes/', name: 'marker-draft.md', snippet: 'Черновик: [маркер] как файл .ccskip в корне каталога', matched: 'маркер', project: 'crosscode', when: 'в индексе с 14 авг', topic: 'индексация' };
+    const K = (k, t) => ({ k, t });
+    const mainKeys = [K('↑↓', 'Выбрать'), K('⏎', 'Открыть в Claude Code'), K('⌘⏎', 'Показать здесь'), K('⇥', 'Граф'), K('⌘K', 'Контекст')];
+    const base = { q: 'маркер политика', idx: 'ok', filter: 'Всё', chatsHead: 'Чаты', chatsCount: '3 из 16', chatsMore: 'Ещё 13', chats: [{ ...c1, sel: true }, c2, c3], files: [f1, f2, f3], filesCount: '3 из 9', filesMore: 'Ещё 6', listH: '300px', cnt: { more: true, page: 'стр. 1 из 2', policy: '3', missing: '4' }, graph: 'full', keys: mainKeys };
+    const cfg = {
+      main: base,
+      indexing: { ...base, idx: 'pass', listH: '300px', cnt: { more: true, page: 'стр. 1 из 2', policy: '3', missing: 'уточняется' } },
+      collapsed: { ...base, chats: [{ ...c1, sel: true }, c2, c3, c4], chatsCount: '4 из 16', chatsMore: 'Ещё 12', graph: 'bar', bar: { t: 'свёрнут · 10 узлов вокруг «Почему сверка помечала 727…»', a: 'Развернуть' }, keys: [K('↑↓', 'Выбрать'), K('⏎', 'Открыть в Claude Code'), K('⌘⏎', 'Показать здесь'), K('⇥', 'Развернуть граф'), K('⌘K', 'Контекст')] },
+      typing: { ...base, q: 'идемпот', chatsCount: '2 · обновляется', chatsMore: '', chats: [{ ...pay, snippet: '…exponential backoff, но [идемпотент]ность ключа мы так и не закрыли…', sel: true }, { tool: 'claude', title: 'Ключи идемпотентности для webhook-ретраев', snippet: '…ключ [идемпотент]ности живёт 24 часа, повтор после этого примет событие как новое…', project: 'payments-api', when: 'месяц назад', count: '29 сообщений', topic: 'платежи' }], files: [{ status: 'present', dir: '~/Projects/payments-api/src/webhooks/', name: 'retry.ts', snippet: '// ключ [идемпотент]ности считаем от event.id, а не от payload', matched: 'идемпотент…', project: 'payments-api', when: 'вчера', topic: 'платежи' }], filesCount: '1 из 3', filesMore: 'Ещё 2', listH: 'none', cnt: { more: false, policy: '0', missing: '0' }, graph: 'bar', bar: { t: 'построится после паузы в наборе', a: '' }, keys: [K('↑↓', 'Выбрать'), K('⏎', 'Открыть в Codex'), K('⌘⏎', 'Показать здесь'), K('⌘K', 'Контекст')] },
+      empty: { ...base, q: '', chatsHead: 'Недавние чаты', chatsCount: '', chatsMore: '', chats: [plain(c1), pay, plain(c2)], files: [], listH: 'none', cnt: null, graph: 'none', keys: [K('↓', 'К недавним'), K('⏎', 'Открыть выбранный'), K('⌘1–4', 'Фильтры'), K('⌘K', 'Контекст')] },
+      noresults: { ...base, q: 'reconcile ledger v3', idx: 'stale', filter: 'Чаты', list: false, cnt: { more: false, policy: '2', missing: '0' }, graph: 'none', keys: [K('↑↓', 'Выбрать шаг'), K('⏎', 'Выполнить'), K('⌘1', 'Всё'), K('⌘K', 'Контекст')] },
+      firstrun: { ...base, q: '', idx: 'empty', ctxSub: 'не настроен', list: false, cnt: null, graph: 'none', keys: [K('↑↓', 'Выбрать'), K('␣', 'Включить'), K('⌘O', 'Файл экспорта'), K('⏎', 'Начать индексацию')] },
+      openfail: { ...base, q: 'webhook ретрай', chatsCount: '3 из 7', chatsMore: 'Ещё 4', chats: [{ tool: 'cursor', title: 'Ретраи webhook: очередь или cron', snippet: '…[webhook] падает на таймауте, и [ретрай] из cron дублирует списание…', project: 'payments-api', when: '12 сен', count: '34 сообщения', topic: 'платежи', sel: true, err: true }, pay, { tool: 'claude', title: 'Ключи идемпотентности для webhook-ретраев', snippet: '…[ретрай] [webhook] после 24 часов примет событие как новое…', project: 'payments-api', when: 'месяц назад', count: '29 сообщений', topic: 'платежи' }], files: [], listH: 'none', cnt: { more: false, policy: '1', missing: '0' }, graph: 'bar', bar: { t: 'свёрнут', a: 'Развернуть' }, keys: [K('⏎', 'Повторить'), K('⌘⏎', 'Показать здесь'), K('⌘C', 'Скопировать ID'), K('⇥', 'Граф'), K('⌘K', 'Контекст')] }
+    }[S] || base;
+    const filters = [['Всё', '⌘1'], ['Чаты', '⌘2'], ['Файлы', '⌘3'], ['Темы', '⌘4']].map(([label, key]) => { const on = label === cfg.filter; return { label, key, bg: on ? 'var(--fg)' : 'transparent', fg: on ? 'var(--inv)' : 'var(--fg2)' }; });
+    const sources = [['Claude Code', 'CC', 'var(--t-claude)'], ['Codex', 'Cx', 'var(--t-codex)'], ['Cursor', 'Cu', 'var(--t-cursor)'], ['ChatGPT', 'GP', 'var(--t-chatgpt)']].map(([label, mono, color]) => ({ label, mono, color }));
+    const hasList = cfg.list !== false;
+    const steps = [
+      { glyph: '∗', title: 'Искать во всём: чаты, файлы и темы', sub: 'Снять фильтр «Чаты»', key: '⏎', sel: true },
+      { glyph: '∨', title: 'Любое из слов: reconcile · ledger · v3', sub: 'Сейчас нужны все три слова сразу', key: '⌥⏎' },
+      { glyph: '⇄', title: 'Повторить в контексте personal', sub: 'Это отдельный поиск — выдачи контекстов не смешиваются', key: '⌘K' }
+    ].map(s => ({ ...s, bg: s.sel ? 'var(--sel)' : 'transparent', kbg: s.sel ? 'var(--accent)' : 'var(--fill2)', kfg: s.sel ? '#fff' : 'var(--fg2)' }));
+    const setup = [
+      { on: true, mono: '~/', color: 'var(--fill2)', mfg: 'var(--fg)', title: '~/Projects', sub: '26 репозиториев · ≈480 000 файлов', status: 'папка' },
+      { on: true, mono: 'CC', color: 'var(--t-claude)', title: 'Claude Code', sub: '~/.claude/projects', status: 'найдено 214 сессий' },
+      { on: true, mono: 'Cx', color: 'var(--t-codex)', title: 'Codex', sub: '~/.codex/sessions', status: 'найдено 96 сессий' },
+      { on: true, mono: 'Cu', color: 'var(--t-cursor)', title: 'Cursor', sub: 'workspaceStorage', status: 'найдено 131 беседа' },
+      { on: false, mono: 'GP', color: 'var(--t-chatgpt)', title: 'ChatGPT', sub: 'Экспорт не найден — перетащите conversations.json или нажмите ⌘O', status: 'нужен файл экспорта', warn: true, sel: true }
+    ].map(u => ({ ...u, off: !u.on, mfg: u.mfg || '#fff', sfg: u.warn ? 'var(--warn)' : 'var(--fg3)', bg: u.sel ? 'var(--sel)' : 'transparent' }));
+    return {
+      ctx: 'work', ctxSub: cfg.ctxSub || '', q: cfg.q, hasQuery: !!cfg.q, noQuery: !cfg.q,
+      placeholder: S === 'firstrun' ? 'Сначала отметьте источники ниже' : 'Искать в чатах и файлах',
+      idxOk: cfg.idx === 'ok', idxPass: cfg.idx === 'pass', idxStale: cfg.idx === 'stale', idxEmpty: cfg.idx === 'empty',
+      isIndexing: S === 'indexing', isEmpty: S === 'empty', isNoRes: S === 'noresults', isFirst: S === 'firstrun',
+      showFilters: S !== 'firstrun', filters, sources,
+      hasList, listH: cfg.listH, hasChats: hasList && cfg.chats.length > 0, chatsHead: cfg.chatsHead, chatsCount: cfg.chatsCount, chatsMore: cfg.chatsMore, chats: cfg.chats,
+      hasFiles: hasList && cfg.files.length > 0, files: cfg.files, filesCount: cfg.filesCount, filesMore: cfg.filesMore,
+      hasCounters: !!cfg.cnt, cnt: cfg.cnt || {}, graphFull: cfg.graph === 'full', graphBar: cfg.graph === 'bar', bar: cfg.bar || {},
+      steps, setup, keys: cfg.keys
+    };
+  }
+}
+</script>
+</body>
+</html>

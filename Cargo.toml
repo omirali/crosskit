@@ -1,0 +1,118 @@
+[package]
+name = "crosskit"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+# Lets the batch limit benchmark build a binary whose batch limits come from
+# `CROSSKIT_BATCH_LIMIT_SOURCES` and `CROSSKIT_BATCH_LIMIT_PAYLOAD_MIB`, read at compile
+# time. Off by default, so a released Crosskit has one compiled-in limit and reads
+# nothing about batching from the environment.
+batch-limit-benchmark = []
+# Lets the engine tuning benchmark build a binary whose LadybugDB buffer pool size and
+# thread count come from `CROSSKIT_BUFFER_POOL_MIB` and `CROSSKIT_MAX_THREADS`, read at
+# compile time. Off by default, so a released Crosskit leaves both to the engine and
+# reads nothing about them from its environment.
+engine-tuning-benchmark = []
+# Lets a diagnostic build count what Crosskit's own code allocates: a global allocator
+# wrapper keeps the peak sum of live Rust allocations and the binary prints it when it
+# ends. Off by default, so a released Crosskit runs on the system allocator. The storage
+# engine is C++ and allocates outside this counter, which is why the number is a
+# regression baseline for our side of the process and not a memory limit.
+allocation-profile = []
+# Lets the search commit benchmark build a binary whose index commit interval comes from
+# `CROSSKIT_SEARCH_COMMIT_FILES`, read at compile time. Off by default, so a released
+# Crosskit has one compiled-in interval and reads nothing about committing from its
+# environment. Stage 19 measured the interval against four axes at once — held allocations,
+# pass time, query latency and index segments — and no single number is right on all of
+# them, which is why the curve has to be reproducible.
+search-commit-benchmark = []
+# Lets Stage 31 build the insight-layer measurement: transcripts of Claude Code sessions
+# parsed into conversations and replies, terms taken through the index analyzer, a
+# co-occurrence graph weighted by PMI, and the fifteen owner questions ranked over it. Off by
+# default, and nothing under it is compiled into a released Crosskit — the modules are
+# declared `cfg(all(test, feature = "insight-layer-measurement"))`, so even a build that
+# turns the feature on carries none of it unless it is a test build. It writes nothing to
+# the graph, changes no schema and calls no model.
+insight-layer-measurement = []
+# Lets Stage 34 build the coverage audit: every configured root walked by the product's own
+# walker under the product's own policy, every entry sorted into a named class, and the
+# result put beside what each context's graph holds under that root. Off by default, and
+# nothing under it is compiled into a released Crosskit — the modules are declared
+# `cfg(all(test, feature = "coverage-audit"))`, so even a build that turns the feature on
+# carries none of it unless it is a test build. It indexes nothing, writes to no graph of
+# the owner's and changes no configuration.
+coverage-audit = []
+# Lets Stage 38 build the context split measurement: how many projects, transcript folders and
+# document folders of the owner's machine fall into a work and a personal context by signals
+# that cost nothing — the organization of a repository's remote, the mail domain its own files
+# record, the folder Claude Code files a transcript under, the working directory inside it —
+# and what would be left for a model. Off by default, and nothing under it is compiled into a
+# released Crosskit — the modules are declared `cfg(all(test, feature =
+# "context-split-measurement"))`. It writes nothing, opens no database, runs no `git` and
+# calls no model: the one step that would reach a model is assembled and weighed, never sent.
+context-split-measurement = []
+# Lets the stage «Сшивка бесед» build its measurement: every Claude Code transcript and Codex
+# session of the owner's home read into the facts stitching compares — where and when a session
+# ran, which files it wrote and named, which conversations and tracker tasks its owner named —
+# and the candidate tasks those facts add up to (ADR 0051). Off by default, and nothing under it
+# is compiled into a released Crosskit — the modules are declared `cfg(all(test, feature =
+# "task-stitching-measurement"))`. It opens no database, runs no `git` and calls no model.
+task-stitching-measurement = []
+# Lets the stage «Карта решений» build its measurement: the conversations of one task the owner
+# confirmed, read from the graph, put to the installed `claude` tool with a schema of forks,
+# branches and risks, and every node's quote checked against the reply it names (ADR 0054). It
+# calls a model, so it needs the context's `send_content_outside` and says so. Off by default,
+# and nothing under it is compiled into a released Crosskit — the modules are declared
+# `cfg(all(test, feature = "decision-map-measurement"))`. It writes nothing to the graph.
+decision-map-measurement = []
+
+[profile.dev]
+# Stage W. On macOS the default keeps a debug build's debug information in its object files,
+# so every `*.rcgu.o` stays in `target/debug/deps` and none is ever removed: one rebuild after
+# an edit left 3 862 more, and ten days left 867 613. macOS reads the directory of a process
+# that starts an FSEvents stream before the stream starts, and at that size the start took
+# 10–16 s instead of half a millisecond — six of the seven watcher tests failed on it. `off`
+# leaves no objects behind (measured: 0 after a full and an incremental build, the rebuild
+# 5.3 s against 5.0 s). What it costs is debugger information and line numbers in
+# `RUST_BACKTRACE` frames of debug builds; a panic still names its file and line. Release
+# builds are untouched, and on Linux `off` is already the default.
+split-debuginfo = "off"
+
+[dependencies]
+lbug = "0.20.4"
+libc = "0.2"
+serde_json = "1.0"
+# Reproducible SHA-256 identities for source revisions and chunks.
+sha2 = "0.10"
+# Typed deserialization of the index policy file; serde is already in the dependency graph.
+serde = { version = "1.0", features = ["derive"] }
+# TOML reader for the `[index]` policy configuration described in the architecture document.
+toml = { version = "1.1", default-features = false, features = ["std", "parse", "serde"] }
+# Recursive filesystem change notifications for `index watch`; the recommended backend is
+# FSEvents on macOS. Events are only path-free hints that trigger a reconcile pass.
+notify = "8.2.0"
+# Cross-platform Ctrl-C handling for the foreground watcher without a hand-written signal
+# handler; the handler only queues a stop request.
+ctrlc = { version = "3.5.2", features = ["termination"] }
+# The one HTTP client, for the one call this program makes: a model provider. Blocking, so
+# there is no async runtime to pull in and no executor to reason about in a worker that is
+# already one thread; rustls, so TLS needs no system library; explicit per-call and connect
+# timeouts, because a worker hung on a socket holds its claim until the lease runs out.
+# Default features are off to drop the gzip chain, which a few hundred bytes of JSON does
+# not need: 17 crates in the tree against tokio + hyper + h2 for `reqwest`. It lives only in
+# `infrastructure/anthropic/https_transport.rs`; no layer above it names a ureq type.
+ureq = { version = "3.4.2", default-features = false, features = ["rustls"] }
+# The two Snowball algorithms the analyzer routes tokens to. Named directly rather than
+# reached through tantivy, because which algorithm a token gets is this program's rule.
+rust-stemmers = "1.2.0"
+# The embedded search index: one directory per context, outside the graph, which stays the
+# single source of truth. Why this and not the engine's full-text extension or an index in
+# the graph is measured in ADR 0011 and ADR 0012.
+#
+# `default-features = false` is not tuning. The default set includes
+# `columnar-zstd-compression`, which links `zstd-sys`, and the storage engine's own static
+# library already carries zstd: on Linux the two collide as duplicate symbols and the link
+# fails outright. Store compression is lz4 instead, which the engine does not vendor. The
+# set is the one Stage 8 measured, unchanged.
+tantivy = { version = "0.26.2", default-features = false, features = ["mmap", "stopwords", "lz4-compression", "stemmer"] }

@@ -1,0 +1,23 @@
+# Фразы периода для английского языка. Правила те же, что у `ru.toml`: перечень закрыт,
+# слова строчные и без знаков, каждый ключ назван.
+language = "en"
+
+[phrases]
+today = ["today"]
+yesterday = ["yesterday"]
+this-week = ["this week"]
+last-week = ["last week"]
+this-month = ["this month"]
+last-month = ["last month"]
+month-01 = ["in january"]
+month-02 = ["in february"]
+month-03 = ["in march"]
+month-04 = ["in april"]
+month-05 = ["in may"]
+month-06 = ["in june"]
+month-07 = ["in july"]
+month-08 = ["in august"]
+month-09 = ["in september"]
+month-10 = ["in october"]
+month-11 = ["in november"]
+month-12 = ["in december"]

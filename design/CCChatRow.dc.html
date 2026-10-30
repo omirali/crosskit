@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;column-gap:12px;align-items:start;padding:9px 10px;border-radius:10px;background:{{ bg }};font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,sans-serif;">
+  <div style="width:28px;height:28px;margin-top:1px;border-radius:7px;background:{{ toolColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;letter-spacing:0.02em;">{{ mono }}</div>
+  <div style="min-width:0;display:flex;flex-direction:column;gap:3px;">
+    <div style="font-size:13.5px;line-height:18px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.title }}</div>
+    <div style="font-size:12.5px;line-height:17px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><sc-for list="{{ parts }}" as="p" hint-placeholder-count="1"><sc-if value="{{ p.m }}"><mark style="background:var(--mark);color:var(--fg);border-radius:3px;padding:0 2px;">{{ p.t }}</mark></sc-if><sc-if value="{{ p.n }}"><span>{{ p.t }}</span></sc-if></sc-for></div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:18px;color:var(--fg3);white-space:nowrap;min-width:0;overflow:hidden;">
+      <span style="color:var(--fg2);font-weight:500;">{{ toolLabel }}</span><span>·</span><span>{{ it.project }}</span><span>·</span><span>{{ it.when }}</span><span>·</span><span>{{ it.count }}</span>
+      <sc-if value="{{ hasTopic }}"><span style="display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px 0 6px;margin-left:2px;border-radius:9px;border:1px solid var(--sep2);font-size:11px;"><span style="width:9px;height:6px;border-radius:3px;border:1.5px solid var(--n-topic);"></span><span style="color:var(--fg3);">тема</span><span style="color:var(--fg2);">{{ it.topic }}</span></span></sc-if>
+    </div>
+  </div>
+  <sc-if value="{{ sel }}">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:1px;">
+      <div style="display:flex;align-items:center;gap:8px;height:26px;padding:0 5px 0 10px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;white-space:nowrap;">Открыть в {{ toolLabel }}<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:5px;background:rgba(255,255,255,0.22);font-size:11px;">⏎</span></div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--fg3);white-space:nowrap;"><span style="display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 4px;border-radius:4px;background:var(--fill2);color:var(--fg2);font-size:10.5px;">⌘⏎</span>показать здесь</div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:70},&quot;item&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;selected&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const it = this.props.item || {};
+    const T = { claude: ['Claude Code', 'CC', 'var(--t-claude)'], codex: ['Codex', 'Cx', 'var(--t-codex)'], cursor: ['Cursor', 'Cu', 'var(--t-cursor)'], chatgpt: ['ChatGPT', 'GP', 'var(--t-chatgpt)'] }[it.tool] || ['—', '?', 'var(--fg3)'];
+    const parts = String(it.snippet || '').split(/(\[[^\]]+\])/).filter(Boolean).map(s => s[0] === '[' ? { t: s.slice(1, -1), m: true } : { t: s, n: true });
+    const sel = !!this.props.selected;
+    return { it, toolLabel: T[0], mono: T[1], toolColor: T[2], parts, sel, bg: sel ? 'var(--sel)' : 'transparent', hasTopic: !!it.topic };
+  }
+}
+</script>
+</body>
+</html>

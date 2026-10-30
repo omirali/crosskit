@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="width:860px;box-sizing:border-box;padding:28px;border-radius:16px;background:var(--desk);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,sans-serif;display:flex;flex-direction:column;gap:18px;">
+  <div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">СТРОКА-ЧАТ · обычная / выделенная</div>
+    <dc-import name="CCChatRow" item="{{ pay }}" hint-size="100%,66px"></dc-import>
+    <dc-import name="CCChatRow" item="{{ c1 }}" selected="{{ true }}" hint-size="100%,66px"></dc-import>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">СТРОКА-ФАЙЛ · present / missing / выделенная missing</div>
+    <dc-import name="CCFileRow" item="{{ f1 }}" hint-size="100%,66px"></dc-import>
+    <dc-import name="CCFileRow" item="{{ f3 }}" hint-size="100%,66px"></dc-import>
+    <dc-import name="CCFileRow" item="{{ f3 }}" selected="{{ true }}" hint-size="100%,66px"></dc-import>
+  </div>
+  <div style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;">
+    <div style="display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+      <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">ЧИП КОНТЕКСТА · закрыт / меню ⌘K</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:7px;height:30px;padding:0 5px 0 10px;border-radius:8px;background:var(--fill2);"><span style="font-size:13px;font-weight:600;">work</span><svg width="9" height="9" viewBox="0 0 10 10"><path d="M2 3.5 L5 6.5 L8 3.5" style="fill:none;stroke:var(--fg2);stroke-width:1.5px;stroke-linecap:round;"></path></svg><span style="display:inline-flex;align-items:center;height:20px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:10.5px;">⌘K</span></div>
+        <div style="display:flex;align-items:center;gap:7px;height:30px;padding:0 5px 0 10px;border-radius:8px;background:var(--fill2);"><span style="font-size:13px;font-weight:600;">personal</span><svg width="9" height="9" viewBox="0 0 10 10"><path d="M2 3.5 L5 6.5 L8 3.5" style="fill:none;stroke:var(--fg2);stroke-width:1.5px;stroke-linecap:round;"></path></svg><span style="display:inline-flex;align-items:center;height:20px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:10.5px;">⌘K</span></div>
+      </div>
+      <div style="width:260px;padding:6px;border-radius:11px;background:var(--bg-solid);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;">
+        <div style="padding:4px 8px 6px;font-size:11px;color:var(--fg3);">Контекст поиска</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:var(--accent);color:#fff;"><div style="flex:1;display:flex;flex-direction:column;gap:1px;"><span style="font-size:13px;font-weight:600;">work</span><span style="font-size:11px;opacity:0.85;">26 репозиториев · 468 бесед</span></div><span style="font-size:12px;">✓</span></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;"><div style="flex:1;display:flex;flex-direction:column;gap:1px;"><span style="font-size:13px;font-weight:600;">personal</span><span style="font-size:11px;color:var(--fg3);">4 репозитория · 57 бесед</span></div></div>
+        <div style="padding:6px 8px 4px;border-top:1px solid var(--sep);margin-top:2px;font-size:11px;line-height:15px;color:var(--fg3);">Поиск всегда внутри одного контекста. Выдачи не смешиваются.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+      <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">ЧИП ТЕМЫ · метка модели</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px 0 6px;border-radius:9px;border:1px solid var(--sep2);font-size:11px;"><span style="width:9px;height:6px;border-radius:3px;border:1.5px solid var(--n-topic);"></span><span style="color:var(--fg3);">тема</span><span style="color:var(--fg2);">индексация</span></span>
+        <span style="display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px 0 6px;border-radius:9px;border:1px solid var(--sep2);font-size:11px;"><span style="width:9px;height:6px;border-radius:3px;border:1.5px solid var(--n-topic);"></span><span style="color:var(--fg3);">тема</span><span style="color:var(--fg2);">платежи</span></span>
+      </div>
+      <div style="font-size:11.5px;line-height:16px;color:var(--fg3);">Всегда отдельно от фрагмента, с подписью «тема» и формой узла-темы.</div>
+      <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;margin-top:6px;">ИНДИКАТОР ИНДЕКСА</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--fg3);"><span style="width:7px;height:7px;border-radius:50%;background:var(--ok);"></span>индекс свежий</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--fg2);"><span style="width:10px;height:10px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--accent);border-right-color:transparent;"></span>проход · 61%</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--warn);"><svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9.5,9 0.5,9" style="fill:var(--warn);"></polygon></svg>отстал на 2 ч</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">УЗЛЫ ГРАФА · тип различим формой, цветом и штрихом</div>
+    <svg viewBox="0 0 772 86" width="772" height="86" style="display:block;">
+      <g transform="translate(70,34)"><rect x="-64" y="-18" width="128" height="36" rx="9" style="fill:var(--n-conv);"></rect><text x="-54" y="-2" style="fill:#fff;font-size:11px;font-weight:600;">Retry policy for…</text><text x="-54" y="11" style="fill:rgba(255,255,255,0.85);font-size:9.5px;">Codex · 17</text><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Беседа</text></g>
+      <g transform="translate(212,34)"><rect x="-68" y="-22" width="136" height="44" rx="12" style="fill:none;stroke:var(--accent);stroke-width:2px;"></rect><rect x="-64" y="-18" width="128" height="36" rx="9" style="fill:var(--n-conv);"></rect><text x="-54" y="4" style="fill:#fff;font-size:11px;font-weight:600;">в фокусе</text><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Выделенный</text></g>
+      <g transform="translate(330,34)"><circle r="6" style="fill:var(--bg-solid);stroke:var(--n-msg);stroke-width:1.5px;"></circle><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Сообщение</text></g>
+      <g transform="translate(420,34)"><rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:var(--n-file);"></rect><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Файл</text></g>
+      <g transform="translate(510,34)"><rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:var(--bg-solid);stroke:var(--warn);stroke-width:1.5px;stroke-dasharray:2.5 2;"></rect><text y="40" style="fill:var(--warn);font-size:10.5px;text-anchor:middle;">нет на диске</text></g>
+      <g transform="translate(596,34)"><polygon points="0,-8 8,0 0,8 -8,0" style="fill:var(--n-proj);"></polygon><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Проект</text></g>
+      <g transform="translate(670,34)"><rect x="-9" y="-5.5" width="18" height="11" rx="5.5" style="fill:var(--bg-solid);stroke:var(--n-topic);stroke-width:1.5px;"></rect><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Тема</text></g>
+      <g transform="translate(736,34)"><rect x="-28" y="-10" width="56" height="20" rx="10" style="fill:none;stroke:var(--fg3);stroke-width:1px;stroke-dasharray:3 3;"></rect><text y="3.5" style="fill:var(--fg2);font-size:10px;text-anchor:middle;">+39</text><text y="40" style="fill:var(--fg3);font-size:10.5px;text-anchor:middle;">Обрезано</text></g>
+    </svg>
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;margin-top:6px;">ЛЕГЕНДА</div>
+    <div style="display:flex;align-items:center;gap:14px;font-size:10.5px;color:var(--fg3);flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:14px;height:9px;border-radius:3px;background:var(--n-conv);"></span>Беседа</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--n-msg);"></span>Сообщение</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:2px;background:var(--n-file);"></span>Файл</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;box-sizing:border-box;border-radius:2px;border:1.5px dashed var(--warn);"></span>нет на диске</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;background:var(--n-proj);transform:rotate(45deg);"></span>Проект</span>
+      <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid var(--n-topic);"></span>Тема</span>
+      <span style="display:flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px dashed var(--fg3);font-size:11px;color:var(--fg2);">обрезано · показано 10 из 49</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">ФУТЕР СО СЧЁТЧИКАМИ · числа без путей</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;border:1px solid var(--sep);font-size:11.5px;color:var(--fg3);white-space:nowrap;">
+      <div style="display:flex;align-items:center;height:22px;padding:0 9px;border-radius:6px;background:var(--fill2);color:var(--fg);font-weight:500;">Показать ещё 20</div><span>стр. 1 из 2</span><span style="flex:1;"></span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;box-sizing:border-box;border-radius:2px;border:1.5px solid var(--fg3);"></span>Скрыто политикой приватности:<span style="color:var(--fg);font-weight:600;">3</span></span><span>·</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--warn);"></span>Нет на диске, свёрнуто:<span style="color:var(--fg);font-weight:600;">4</span></span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:14px;background:var(--bg-solid);">
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;">ОШИБКА ОТКРЫТИЯ · инструмент не установлен</div>
+    <div style="display:flex;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 7%,transparent);">
+      <svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0;margin-top:1px;"><polygon points="7,1 13.5,12.5 0.5,12.5" style="fill:var(--warn);"></polygon><rect x="6.25" y="5" width="1.5" height="4" style="fill:#fff;"></rect><rect x="6.25" y="10" width="1.5" height="1.5" style="fill:#fff;"></rect></svg>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="font-size:12.5px;font-weight:600;">Не удалось открыть: Codex не установлен на этом Mac</div>
+        <div style="font-size:12px;line-height:17px;color:var(--fg2);">Беседа проиндексирована из ~/.codex/sessions, но приложения, которое её открывает, нет. Прочитать её можно здесь.</div>
+        <div style="display:flex;gap:14px;margin-top:4px;font-size:11.5px;"><span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;height:18px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:11px;">⌘⏎</span>Показать беседу здесь</span><span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-flex;align-items:center;height:18px;padding:0 5px;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:11px;">⌘C</span>Скопировать путь сессии</span></div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:0.02em;margin-top:6px;">КЛАВИШИ</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <sc-for list="{{ keys }}" as="k" hint-placeholder-count="10"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;box-sizing:border-box;border-radius:6px;background:var(--fill2);box-shadow:inset 0 -1px 0 var(--sep2);color:var(--fg2);font-size:12px;font-weight:500;">{{ k }}</span></sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:860,&quot;height&quot;:1200}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      c1: { tool: 'claude', title: 'Почему сверка помечала 727 локаций missing', snippet: '…каталог с [маркером] пропускался на уровне обхода, и сверка читала молчание…', project: 'crosscode', when: '3 дня назад', count: '42 сообщения', topic: 'индексация' },
+      pay: { tool: 'codex', title: 'Retry policy for payment webhook', snippet: '…exponential backoff, но [идемпотентность] ключа мы так и не закрыли…', project: 'payments-api', when: '2 недели назад', count: '17 сообщений', topic: 'платежи' },
+      f1: { status: 'present', dir: '~/Projects/crosscode/docs/adr/', name: '0027-marker-as-policy-rule.md', snippet: 'Пропуск обхода — это правило [политики], а не отдельная сущность', matched: 'маркер, политика', project: 'crosscode', when: '3 дня назад', topic: 'индексация' },
+      f3: { status: 'missing', dir: '~/Projects/crosscode/notes/', name: 'marker-draft.md', snippet: 'Черновик: [маркер] как файл .ccskip в корне каталога', matched: 'маркер', project: 'crosscode', when: 'в индексе с 14 авг', topic: 'индексация' },
+      keys: ['↑', '↓', '⏎', '⌘⏎', '⇥', '⌘1', '⌘2', '⌘3', '⌘4', '⌘K', 'esc']
+    };
+  }
+}
+</script>
+</body>
+</html>

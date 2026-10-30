@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;border-top:1px solid var(--sep);background:var(--graph);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,sans-serif;color:var(--fg);">
+  <div title="Потяните, чтобы изменить высоту" style="position:absolute;top:4px;left:50%;margin-left:-18px;width:36px;height:4px;border-radius:2px;background:var(--sep2);cursor:ns-resize;"></div>
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 4px;">
+    <span style="font-size:12px;font-weight:600;">Граф</span>
+    <div style="display:flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill2);">
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3"><div onClick="{{ m.onClick }}" style="display:flex;align-items:center;height:20px;padding:0 9px;border-radius:5px;font-size:11.5px;font-weight:500;background:{{ m.bg }};color:{{ m.fg }};box-shadow:{{ m.sh }};cursor:default;">{{ m.label }}</div></sc-for>
+    </div>
+    <span style="font-size:11px;color:var(--fg3);">глубина 2 · до 100 узлов</span>
+    <span style="flex:1;"></span>
+    <span style="display:flex;align-items:center;height:20px;padding:0 8px;border-radius:10px;border:1px dashed var(--fg3);font-size:11px;color:var(--fg2);white-space:nowrap;">обрезано · показано 10 из 49</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--fg3);"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:5px;background:var(--fill2);color:var(--fg2);font-size:11px;">⇥</span>фокус</span>
+    <div title="Свернуть граф" style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;" style-hover="background:var(--fill2);"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5 L5 6.5 L8 3.5" style="fill:none;stroke:var(--fg2);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;"></path></svg></div>
+  </div>
+  <div style="position:relative;width:736px;height:170px;margin:0 12px;">
+  <svg viewBox="0 0 736 170" width="736" height="170" style="display:block;overflow:visible;">
+    <sc-for list="{{ edges }}" as="e" hint-placeholder-count="0"><line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" style="stroke:{{ e.stroke }};stroke-width:{{ e.w }};stroke-dasharray:{{ e.dash }};"></line></sc-for>
+    
+    <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="0">
+      <g transform="{{ n.tr }}" onClick="{{ n.onClick }}" style="cursor:pointer;">
+        <sc-if value="{{ n.sel }}"><rect x="{{ n.bx }}" y="{{ n.by }}" width="{{ n.bw }}" height="{{ n.bh }}" rx="{{ n.br }}" style="fill:none;stroke:var(--accent);stroke-width:2px;"></rect></sc-if>
+        <sc-if value="{{ n.isConv }}"><rect x="-95" y="-21" width="190" height="42" rx="9" style="fill:var(--n-conv);"></rect></sc-if>
+        <sc-if value="{{ n.isMsg }}"><circle r="6" style="fill:var(--bg-solid);stroke:var(--n-msg);stroke-width:1.5px;"></circle></sc-if>
+        <sc-if value="{{ n.isFile }}"><rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:var(--n-file);"></rect></sc-if>
+        <sc-if value="{{ n.isMiss }}"><rect x="-6" y="-6" width="12" height="12" rx="2" style="fill:var(--bg-solid);stroke:var(--warn);stroke-width:1.5px;stroke-dasharray:2.5 2;"></rect></sc-if>
+        <sc-if value="{{ n.isProj }}"><polygon points="0,-8 8,0 0,8 -8,0" style="fill:var(--n-proj);"></polygon></sc-if>
+        <sc-if value="{{ n.isTopic }}"><rect x="-9" y="-5.5" width="18" height="11" rx="5.5" style="fill:var(--bg-solid);stroke:var(--n-topic);stroke-width:1.5px;"></rect></sc-if>
+        <sc-if value="{{ n.isMore }}"><rect x="-58" y="-10" width="116" height="20" rx="10" style="fill:var(--bg-solid);stroke:var(--fg3);stroke-width:1px;stroke-dasharray:3 3;"></rect></sc-if>
+      </g>
+    </sc-for>
+  </svg>
+  <sc-for list="{{ labels }}" as="l" hint-placeholder-count="0"><div onClick="{{ l.onClick }}" style="position:absolute;left:{{ l.left }};top:{{ l.top }};transform:{{ l.tf }};font-size:{{ l.size }};font-weight:{{ l.weight }};color:{{ l.color }};background:{{ l.bg }};padding:{{ l.pad }};border-radius:3px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:{{ l.mw }};cursor:pointer;pointer-events:{{ l.pe }};">{{ l.text }}</div></sc-for>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;padding:6px 16px 6px;font-size:10.5px;color:var(--fg3);white-space:nowrap;">
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:14px;height:9px;border-radius:3px;background:var(--n-conv);"></span>Беседа</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--n-msg);"></span>Сообщение</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:2px;background:var(--n-file);"></span>Файл</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;box-sizing:border-box;border-radius:2px;border:1.5px dashed var(--warn);"></span>нет на диске</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;background:var(--n-proj);transform:rotate(45deg);"></span>Проект</span>
+    <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:8px;box-sizing:border-box;border-radius:4px;border:1.5px solid var(--n-topic);"></span>Тема</span>
+    <span style="flex:1;"></span>
+    <span>клик — фокус, не открытие</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin:0 8px 8px;padding:7px 10px;border-radius:9px;background:var(--fill);">
+    <span style="display:flex;align-items:center;height:18px;padding:0 6px;border-radius:5px;background:var(--fill2);font-size:10.5px;font-weight:600;color:var(--fg2);white-space:nowrap;">{{ d.type }}</span>
+    <div style="min-width:0;flex:1;display:flex;flex-direction:column;gap:1px;">
+      <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.title }}</div>
+      <div style="font-size:11px;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.sub }}</div>
+    </div>
+    <sc-if value="{{ d.has }}"><span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg2);white-space:nowrap;"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:5px;background:var(--fill2);font-size:11px;">{{ d.key }}</span>{{ d.action }}</span></sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:290}}">
+class Component extends DCLogic {
+  state = { sel: 'C', mode: 'Файлы' };
+  renderVals() {
+    const sel = this.state.sel;
+    const B = { conv: [-99, -25, 198, 50, 12], msg: [-10, -10, 20, 20, 10], file: [-10, -10, 20, 20, 5], miss: [-10, -10, 20, 20, 5], proj: [-12, -12, 24, 24, 6], topic: [-13, -9, 26, 18, 9], more: [-62, -14, 124, 28, 14] };
+    const raw = [
+      { id: 'P', type: 'proj', x: 56, y: 42, label: 'crosscode', d: ['Проект', 'crosscode', '~/Projects/crosscode · 128 бесед · 31 204 файла', '', ''] },
+      { id: 'T', type: 'topic', x: 56, y: 130, label: 'индексация', d: ['Тема', 'индексация', 'метка модели · 23 беседы · 41 файл', '', ''] },
+      { id: 'C', type: 'conv', x: 245, y: 85, label: 'Почему сверка помечала 727 локаций missing', sub: 'Claude Code · 42 сообщения', d: ['Беседа', 'Почему сверка помечала 727 локаций missing', 'Claude Code · crosskit · 42 сообщения · последнее 3 дня назад', '⏎', 'Открыть в Claude Code'] },
+      { id: 'M1', type: 'msg', x: 450, y: 35, ly: -11, label: '#4 · user', d: ['Сообщение', '#4 · user · 22 сен, 14:02', 'почему 727 локаций в отчёте missing, если они есть на диске?', '⌘⏎', 'Показать здесь'] },
+      { id: 'M2', type: 'msg', x: 450, y: 85, ly: -11, label: '#18 · assistant', d: ['Сообщение', '#18 · assistant · 22 сен, 14:19', 'каталог с маркером пропускался на уровне обхода, и сверка читала молчание', '⌘⏎', 'Показать здесь'] },
+      { id: 'M3', type: 'msg', x: 450, y: 135, ly: 20, label: '#31 · assistant', d: ['Сообщение', '#31 · assistant · 22 сен, 15:40', 'записал черновик правила в notes/marker-draft.md', '⌘⏎', 'Показать здесь'] },
+      { id: 'F1', type: 'file', x: 590, y: 35, label: 'walker.rs', d: ['Файл', '~/Projects/crosscode/src/index/walker.rs', 'на диске · изменён 3 дня назад · из сообщения #4', '⏎', 'Открыть'] },
+      { id: 'F2', type: 'file', x: 590, y: 85, label: '0027-marker-as-poli…', d: ['Файл', '~/Projects/crosscode/docs/adr/0027-marker-as-policy-rule.md', 'на диске · изменён 3 дня назад · из сообщения #18', '⏎', 'Открыть'] },
+      { id: 'F3', type: 'miss', x: 590, y: 135, label: 'marker-draft.md', d: ['Файл · нет на диске', '~/Projects/crosscode/notes/marker-draft.md', 'есть в графе, нет на диске · в индексе с 14 авг · из сообщения #31', '⌘⏎', 'Версия из индекса'] },
+      { id: 'X', type: 'more', x: 245, y: 150, label: '+39 сообщений', d: ['Обрезано', '39 сообщений не показаны', 'в режиме «Файлы» видны только сообщения со ссылками на файлы', '', ''] }
+    ];
+    const nodes = raw.map(r => {
+      const b = B[r.type];
+      return { ...r, tr: `translate(${r.x},${r.y})`, sel: r.id === sel, bx: b[0], by: b[1], bw: b[2], bh: b[3], br: b[4],
+        isConv: r.type === 'conv', isMsg: r.type === 'msg', isFile: r.type === 'file', isMiss: r.type === 'miss', isProj: r.type === 'proj', isTopic: r.type === 'topic', isMore: r.type === 'more',
+        onClick: () => this.setState({ sel: r.id }) };
+    });
+    const E = [
+      ['P', 'C', 56, 42, 245, 85, 'о проекте', 103, 56], ['T', 'C', 56, 130, 245, 85, 'упоминает', 103, 122],
+      ['C', 'M1', 245, 85, 450, 35, 'содержит сообщение', 388, 52], ['C', 'M2', 245, 85, 450, 85, 'содержит сообщение', 388, 88.5], ['C', 'M3', 245, 85, 450, 135, 'содержит сообщение', 388, 125],
+      ['M1', 'F1', 450, 35, 590, 35, 'ссылается на файл', 520, 38.5], ['M2', 'F2', 450, 85, 590, 85, 'ссылается на файл', 520, 88.5], ['M3', 'F3', 450, 135, 590, 135, 'ссылается на файл', 520, 138.5],
+      ['C', 'X', 245, 106, 245, 140, '', 0, 0, true]
+    ];
+    const edges = E.map(e => {
+      const hot = e[0] === sel || e[1] === sel;
+      return { x1: e[2], y1: e[3], x2: e[4], y2: e[5], label: e[6], lx: e[7], ly: e[8], dash: e[9] ? '3 3' : 'none', stroke: hot ? 'var(--accent)' : 'var(--edge)', w: hot ? '1.5px' : '1px' };
+    });
+    const labels = [];
+    const L = (x, y, text, o = {}) => labels.push({ left: x + 'px', top: y + 'px', text, tf: o.c ? 'translateX(-50%)' : 'none', size: o.size || '10.5px', weight: o.w || 400, color: o.color || 'var(--fg)', bg: o.bg || 'transparent', pad: o.bg ? '0 3px' : '0', pe: o.pe || 'auto', mw: o.mw || 'none', onClick: o.onClick });
+    edges.forEach(e => { if (e.label) L(e.lx, e.ly - 10, e.label, { c: 1, size: e.label === 'содержит сообщение' ? '9px' : '9.5px', color: 'var(--fg3)', bg: 'var(--bg-solid)', pe: 'none' }); });
+    nodes.forEach(n => {
+      const oc = n.onClick, x = n.x, y = n.y;
+      if (n.isConv) { L(x - 83, y - 15, n.label, { size: '11.5px', w: 600, color: '#fff', mw: '170px', onClick: oc }); L(x - 83, y + 2, n.sub, { size: '10px', color: 'rgba(255,255,255,0.85)', onClick: oc }); }
+      if (n.isMsg) L(x, y + n.ly - 10, n.label, { c: 1, size: '10px', color: 'var(--fg2)', onClick: oc });
+      if (n.isFile) L(x + 13, y - 7, n.label, { onClick: oc });
+      if (n.isMiss) { L(x + 13, y - 7, n.label, { color: 'var(--fg2)', onClick: oc }); L(x + 13, y + 6, 'нет на диске', { size: '9.5px', color: 'var(--warn)', onClick: oc }); }
+      if (n.isProj) L(x, y - 24, n.label, { c: 1, onClick: oc });
+      if (n.isTopic) L(x, y + 10, n.label, { c: 1, onClick: oc });
+      if (n.isMore) L(x, y - 7, n.label, { c: 1, size: '10px', color: 'var(--fg2)', onClick: oc });
+    });
+    const cur = raw.find(r => r.id === sel) || raw[2];
+    const d = { type: cur.d[0], title: cur.d[1], sub: cur.d[2], key: cur.d[3], action: cur.d[4], has: !!cur.d[3] };
+    const modes = ['Файлы', 'Знания', 'Происхождение'].map(label => {
+      const on = label === this.state.mode;
+      return { label, bg: on ? 'var(--bg-solid)' : 'transparent', fg: on ? 'var(--fg)' : 'var(--fg2)', sh: on ? '0 1px 2px rgba(0,0,0,0.14)' : 'none', onClick: () => this.setState({ mode: label }) };
+    });
+    return { nodes, edges, d, modes, labels };
+  }
+}
+</script>
+</body>
+</html>

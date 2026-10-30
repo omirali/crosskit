@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;column-gap:12px;align-items:start;padding:9px 10px;border-radius:10px;background:{{ bg }};font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,sans-serif;">
+  <div style="position:relative;width:28px;height:28px;margin-top:1px;">
+    <sc-if value="{{ pres }}"><div style="width:28px;height:28px;border-radius:7px;background:var(--fill2);display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:13px;box-sizing:border-box;border-radius:2px;border:1.5px solid var(--fg3);"></div></div><div style="position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;box-sizing:border-box;border-radius:50%;background:var(--ok);border:2px solid var(--bg-solid);"></div></sc-if>
+    <sc-if value="{{ miss }}"><div style="width:28px;height:28px;box-sizing:border-box;border-radius:7px;border:1.5px dashed var(--warn);display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:13px;box-sizing:border-box;border-radius:2px;border:1.5px dashed var(--warn);"></div></div><div style="position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;box-sizing:border-box;border-radius:50%;background:var(--bg-solid);border:2px solid var(--warn);"></div></sc-if>
+  </div>
+  <div style="min-width:0;display:flex;flex-direction:column;gap:3px;">
+    <div style="font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="color:var(--fg3);">{{ it.dir }}</span><span style="color:var(--fg);font-weight:600;">{{ it.name }}</span></div>
+    <div style="font-size:12.5px;line-height:17px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><sc-for list="{{ parts }}" as="p" hint-placeholder-count="1"><sc-if value="{{ p.m }}"><mark style="background:var(--mark);color:var(--fg);border-radius:3px;padding:0 2px;">{{ p.t }}</mark></sc-if><sc-if value="{{ p.n }}"><span>{{ p.t }}</span></sc-if></sc-for></div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:18px;color:var(--fg3);white-space:nowrap;min-width:0;overflow:hidden;">
+      <sc-if value="{{ miss }}"><span style="display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:5px;border:1px solid var(--warn);color:var(--warn);font-weight:500;font-size:11px;">нет на диске</span></sc-if>
+      <span>совпало:</span><span style="color:var(--fg2);font-weight:500;">{{ it.matched }}</span><span>·</span><span>{{ it.project }}</span><span>·</span><span>{{ it.when }}</span>
+      <sc-if value="{{ hasTopic }}"><span style="display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px 0 6px;margin-left:2px;border-radius:9px;border:1px solid var(--sep2);font-size:11px;"><span style="width:9px;height:6px;border-radius:3px;border:1.5px solid var(--n-topic);"></span><span style="color:var(--fg3);">тема</span><span style="color:var(--fg2);">{{ it.topic }}</span></span></sc-if>
+    </div>
+  </div>
+  <sc-if value="{{ selPres }}">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:1px;">
+      <div style="display:flex;align-items:center;gap:8px;height:26px;padding:0 5px 0 10px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;white-space:nowrap;">Открыть<span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:5px;background:rgba(255,255,255,0.22);font-size:11px;">⏎</span></div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--fg3);white-space:nowrap;"><span style="display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 4px;border-radius:4px;background:var(--fill2);color:var(--fg2);font-size:10.5px;">⌘⏎</span>показать здесь</div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ selMiss }}">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-top:1px;">
+      <div style="display:flex;align-items:center;height:26px;padding:0 10px;box-sizing:border-box;border-radius:7px;border:1px solid var(--sep2);color:var(--fg3);font-size:12px;font-weight:500;white-space:nowrap;">Открыть недоступно</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--fg3);white-space:nowrap;"><span style="display:inline-flex;align-items:center;justify-content:center;height:16px;padding:0 4px;border-radius:4px;background:var(--fill2);color:var(--fg2);font-size:10.5px;">⌘⏎</span>версия из индекса</div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:70},&quot;item&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;selected&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const it = this.props.item || {};
+    const sel = !!this.props.selected;
+    const miss = it.status === 'missing';
+    const parts = String(it.snippet || '').split(/(\[[^\]]+\])/).filter(Boolean).map(s => s[0] === '[' ? { t: s.slice(1, -1), m: true } : { t: s, n: true });
+    return { it, parts, miss, pres: !miss, bg: sel ? 'var(--sel)' : 'transparent', selPres: sel && !miss, selMiss: sel && miss, hasTopic: !!it.topic };
+  }
+}
+</script>
+</body>
+</html>
