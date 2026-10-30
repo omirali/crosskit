@@ -66,9 +66,16 @@ pub struct TaskMember {
     last_at_unix_ms: Option<i64>,
     tie: Tie,
     signals: Vec<LinkSignal>,
+    /// The folder its transcript is filed under, as the graph knows it.
+    folder: Option<String>,
 }
 
 impl TaskMember {
+    /// The folder its transcript is filed under: where to look for the transcript itself.
+    pub fn folder(&self) -> Option<&str> {
+        self.folder.as_deref()
+    }
+
     pub fn session_id(&self) -> &str {
         &self.session_id
     }
@@ -246,6 +253,7 @@ fn member_of(session: &SessionFacts, tie: Tie, signals: Vec<LinkSignal>) -> Task
         last_at_unix_ms: session.ended_ms,
         tie,
         signals,
+        folder: session.place.clone(),
     }
 }
 

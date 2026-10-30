@@ -7,6 +7,9 @@ struct RootView: View {
     @Bindable var model: DesktopModel
     /// Окно спрашивает, тратить ли лимит, прежде чем строить.
     @State private var askingToBuild = false
+    /// Каталог новой беседы неизвестен — его выбирает человек.
+    @State private var choosingDirectory = false
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationSplitView {
@@ -48,6 +51,11 @@ struct RootView: View {
         } message: {
             Text("Модель прочитает реплики, которых не покрывает ни одна карта, и потратит лимит подписки. Цену точно назовёт сам claude.")
         }
+        .fileImporter(isPresented: $choosingDirectory, allowedContentTypes: [.folder]) { result in
+            if case .success(let url) = result, let task = model.confirmedTask {
+                continueTask(task, in: url.path)
+            }
+        }
         .alert(model.notice?.title ?? "", isPresented: Binding(get: { model.notice != nil }, set: { if !$0 { model.notice = nil } })) {
             Button("Понятно") { model.notice = nil }
         } message: {
@@ -72,6 +80,16 @@ struct RootView: View {
                     .disabled(model.mode != .line)
             }
             ToolbarItem {
+                Button("Продолжить задачу", systemImage: "bubble.left.and.text.bubble.right") {
+                    if let directory = Self.latestDirectory(of: task) {
+                        continueTask(task, in: directory)
+                    } else {
+                        choosingDirectory = true
+                    }
+                }
+                .help("Новая беседа с Claude Code в каталоге задачи; агент получит основную линию, отказы и риски")
+            }
+            ToolbarItem {
                 Button("Достроить карту", systemImage: "hammer") { askingToBuild = true }
                     .help("Разметить реплики, которых не покрывает ни одна карта")
                     .disabled(model.estimate?.unmappedReplies ?? 0 == 0 || model.build != nil)
@@ -94,6 +112,21 @@ struct RootView: View {
             }
             .help("Показать или спрятать узел")
         }
+    }
+
+    /// Где шла последняя беседа задачи, чей журнал ещё на диске.
+    static func latestDirectory(of task: ConfirmedTask) -> String? {
+        task.conversations
+            .filter { $0.workingDirectory != nil }
+            .max { ($0.lastAtUnixMs ?? 0) < ($1.lastAtUnixMs ?? 0) }?
+            .workingDirectory
+    }
+
+    private func continueTask(_ task: ConfirmedTask, in directory: String) {
+        var brief: String?
+        if case .loaded(let loaded) = model.map { brief = TaskBrief.of(loaded.tree) }
+        openWindow(value: ChatTarget(taskID: task.id, taskName: task.name, context: model.context,
+                                     directory: directory, resume: nil, brief: brief))
     }
 
     private var buildQuestion: String {

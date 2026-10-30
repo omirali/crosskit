@@ -82,6 +82,8 @@ public struct TaskConversation: Decodable, Sendable, Equatable, Identifiable {
     /// `strong` или `neighbour`.
     public let tie: String
     public let signals: [String]
+    /// Где беседа началась, по первому `cwd` её журнала; ничего, когда журнала уже нет.
+    public let workingDirectory: String?
 
     public var id: String { session }
     public var title: String { name ?? opening ?? session }

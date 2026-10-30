@@ -12,6 +12,14 @@ struct CrosskitApp: App {
                 .environment(\.locale, Wording.locale)
         }
         .defaultSize(width: 1320, height: 880)
+        // Беседа с агентом по задаче — своё окно рядом с картой (ADR 0062).
+        WindowGroup("Беседа", id: "chat", for: ChatTarget.self) { $target in
+            if let target {
+                ChatWindow(target: target)
+                    .environment(\.locale, Wording.locale)
+            }
+        }
+        .defaultSize(width: 760, height: 860)
         .commands {
             CommandGroup(after: .toolbar) {
                 Button("Обновить") {

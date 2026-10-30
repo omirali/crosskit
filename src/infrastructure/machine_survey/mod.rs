@@ -32,4 +32,4 @@ pub use git_identity::owner_mail_domain;
 pub(crate) use transcripts::entries_in;
 #[cfg(all(test, feature = "context-split-measurement"))]
 pub(crate) use transcripts::working_directories_in;
-pub use transcripts::{transcript_folders, transcripts_root};
+pub use transcripts::{first_working_directory_in, transcript_folders, transcripts_root};

@@ -7,6 +7,7 @@ struct ConversationsList: View {
     let model: DesktopModel
     let answer: TaskMapAnswer
     let task: ConfirmedTask
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -43,6 +44,14 @@ struct ConversationsList: View {
                         Text(status(of: conversation))
                             .font(.callout)
                             .foregroundStyle(conversation.mappedThrough < conversation.replies ? .orange : .secondary)
+                    }
+                    if let directory = task.conversations.first(where: { $0.session == conversation.session })?.workingDirectory,
+                       platform != .codex {
+                        Button("Продолжить", systemImage: "arrowshape.turn.up.right") {
+                            openWindow(value: ChatTarget(taskID: task.id, taskName: task.name, context: model.context,
+                                                         directory: directory, resume: conversation.session, brief: nil))
+                        }
+                        .help("Продолжить эту беседу в окне")
                     }
                 }
                 .padding(12)

@@ -23,6 +23,7 @@ use crate::domain::task_stitching::session::Platform;
 use crate::domain::task_stitching::stitching::LinkSignal;
 use crate::domain::{CivilDate, TaskBookError, WorkspaceName};
 use crate::infrastructure::analysis::MAP_QUESTION_VERSION;
+use crate::infrastructure::machine_survey::first_working_directory_in;
 use crate::infrastructure::{TaskBookFile, TaskMapFiles, home_directory, unix_now_ms};
 
 use super::machine_answer::{self, FailureCategory, SCHEMA, object_line, refusal_line};
@@ -439,12 +440,22 @@ struct Conversation {
     /// `strong` or `neighbour`.
     tie: String,
     signals: Vec<String>,
+    /// Where the conversation was started, by the first `cwd` of its transcript; nothing when
+    /// the transcript is gone. What a conversation continued from the window runs in (ADR 0062).
+    #[serde(default)]
+    working_directory: Option<String>,
 }
 
 fn conversations_of(members: &[TaskMember]) -> Vec<Conversation> {
     members
         .iter()
         .map(|member| Conversation {
+            working_directory: member.folder().and_then(|folder| {
+                let transcript =
+                    std::path::Path::new(folder).join(format!("{}.jsonl", member.session_id()));
+                first_working_directory_in(&transcript)
+                    .map(|directory| directory.as_str().to_string())
+            }),
             session: member.session_id().to_string(),
             platform: match member.platform() {
                 Platform::ClaudeCode => "claude-code",

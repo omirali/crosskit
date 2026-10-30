@@ -72,35 +72,42 @@ struct WorkingDirectoryOnly {
 /// line that is not an object with a string `cwd`, or that names no absolute directory, names
 /// none; a file that cannot be read names none either.
 pub(crate) fn working_directories_in(path: &Path) -> Vec<NormalizedPath> {
-    let Ok(file) = fs::File::open(path) else {
-        return Vec::new();
-    };
-    let mut reader = BufReader::new(file);
-    let mut buffer = Vec::new();
     let mut seen: BTreeSet<String> = BTreeSet::new();
-    let mut found = Vec::new();
-    loop {
-        buffer.clear();
-        match (&mut reader)
-            .take(MOST_BYTES_PER_LINE)
-            .read_until(b'\n', &mut buffer)
-        {
-            Ok(0) | Err(_) => return found,
-            Ok(_) => {}
+    working_directories(path)
+        .filter(|directory| seen.insert(directory.as_str().to_string()))
+        .collect()
+}
+
+/// Where a conversation was started: the first `cwd` its transcript carries. Reading stops at
+/// it, because a transcript can run to tens of megabytes and the start is in its first lines.
+pub fn first_working_directory_in(path: &Path) -> Option<NormalizedPath> {
+    working_directories(path).next()
+}
+
+/// The `cwd` of every line of a transcript that names one, read as the lines are asked for.
+fn working_directories(path: &Path) -> impl Iterator<Item = NormalizedPath> {
+    let reader = fs::File::open(path).ok().map(BufReader::new);
+    let mut buffer = Vec::new();
+    std::iter::from_fn({
+        let mut reader = reader;
+        move || -> Option<Option<NormalizedPath>> {
+            let reader = reader.as_mut()?;
+            buffer.clear();
+            match reader
+                .take(MOST_BYTES_PER_LINE)
+                .read_until(b'\n', &mut buffer)
+            {
+                Ok(0) | Err(_) => return None,
+                Ok(_) => {}
+            }
+            let named = serde_json::from_slice::<WorkingDirectoryOnly>(&buffer)
+                .ok()
+                .and_then(|line| line.cwd)
+                .and_then(|cwd| NormalizedPath::from_absolute(&cwd).ok());
+            Some(named)
         }
-        let Ok(line) = serde_json::from_slice::<WorkingDirectoryOnly>(&buffer) else {
-            continue;
-        };
-        let Some(cwd) = line.cwd else {
-            continue;
-        };
-        if !seen.insert(cwd.clone()) {
-            continue;
-        }
-        if let Ok(directory) = NormalizedPath::from_absolute(&cwd) {
-            found.push(directory);
-        }
-    }
+    })
+    .flatten()
 }
 
 /// What `directory` lists, or nothing when it cannot be listed. `file_type` of an entry is the

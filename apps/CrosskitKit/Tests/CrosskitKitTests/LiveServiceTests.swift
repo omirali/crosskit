@@ -33,3 +33,35 @@ struct LiveServiceTests {
             """)
     }
 }
+
+/// Одна настоящая беседа с установленным `claude` через login-оболочку: поток, текст кусками,
+/// конец хода. Тратит лимит подписки, поэтому только по переменной окружения.
+///
+///     CROSSKIT_LIVE_CHAT=1 swift test --filter LiveChat
+@Suite("Живой claude", .enabled(if: ProcessInfo.processInfo.environment["CROSSKIT_LIVE_CHAT"] != nil))
+struct LiveChatTests {
+
+    @Test("Ход настоящего claude приходит потоком и кончается итогом")
+    func aRealTurnStreams() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ck-live-chat")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let session = ChatSession(start: .init(directory: directory, model: "haiku"))
+        var pieces = 0
+        var finished: TurnResult?
+        // Первым пишет человек: в режиме потокового ввода claude молчит до первого слова.
+        let events = await session.events()
+        await session.send("Ответь одним словом: готово.")
+        for try await event in events {
+            switch event {
+            case .text: pieces += 1
+            case .finished(let result):
+                finished = result
+                await session.close()
+            default: break
+            }
+        }
+        #expect(pieces > 0, "текст пришёл кусками")
+        #expect(finished?.isError == false)
+        print("кусков текста \(pieces), стоимость \(finished?.costUSD ?? 0) $")
+    }
+}

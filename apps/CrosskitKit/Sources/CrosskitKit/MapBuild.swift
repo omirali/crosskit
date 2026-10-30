@@ -41,12 +41,10 @@ public enum MapBuild {
         return FileManager.default.isExecutableFile(atPath: program.path) ? program : nil
     }
 
-    /// Аргументы оболочки. Команда идёт через `zsh -l`: так она находит `claude` по тому же
-    /// PATH, что в терминале владельца, а у приложения из Finder PATH — только системный.
-    /// `"$@"` передаёт аргументы как есть, и имя задачи не может стать командой.
+    /// Аргументы оболочки: команда идёт через login-оболочку, чтобы нашёлся `claude`.
     static func shellArguments(program: URL, task: String, context: String?) -> [String] {
         let command = (context.map { ["--context", $0] } ?? []) + ["tasks", "map", task, "--build"]
-        return ["-l", "-c", "exec \"$@\"", "crosskit", program.path] + command
+        return LoginShell.arguments(running: program.path, with: command)
     }
 
     /// Запускает построение. Поток отдаёт строки хода и кончается, когда команда закончила;
@@ -54,7 +52,7 @@ public enum MapBuild {
     public static func run(program: URL, task: String, context: String?) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+            process.executableURL = LoginShell.shell
             process.arguments = shellArguments(program: program, task: task, context: context)
             process.standardOutput = FileHandle.nullDevice
             let errors = Pipe()
