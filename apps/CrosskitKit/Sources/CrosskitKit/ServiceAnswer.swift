@@ -35,7 +35,7 @@ enum ServiceAnswer {
 
 extension Date {
     /// Миллисекунды Unix, в которых ядро отдаёт время.
-    init(unixMilliseconds: Int64) {
+    public init(unixMilliseconds: Int64) {
         self.init(timeIntervalSince1970: TimeInterval(unixMilliseconds) / 1000)
     }
 }

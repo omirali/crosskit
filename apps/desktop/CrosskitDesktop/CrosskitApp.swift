@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Crosskit для macOS: задача как карта решений (ADR 0058, этап D-1).
+/// Crosskit для macOS: задача как карта решений и беседа с агентом рядом с ней (ADR 0058, 0063).
 @main
 struct CrosskitApp: App {
 
@@ -10,22 +10,21 @@ struct CrosskitApp: App {
         WindowGroup("Crosskit") {
             RootView(model: model)
                 .environment(\.locale, Wording.locale)
+                #if DEBUG
+                .onAppear { Snapshots.runIfAsked(model) }
+                #endif
         }
-        .defaultSize(width: 1320, height: 880)
-        // Беседа с агентом по задаче — своё окно рядом с картой (ADR 0062).
-        WindowGroup("Беседа", id: "chat", for: ChatTarget.self) { $target in
-            if let target {
-                ChatWindow(target: target)
-                    .environment(\.locale, Wording.locale)
-            }
-        }
-        .defaultSize(width: 760, height: 860)
+        .defaultSize(width: 1500, height: 940)
         .commands {
             CommandGroup(after: .toolbar) {
                 Button("Обновить") {
                     Task { await model.reload() }
                 }
                 .keyboardShortcut("r")
+                Button("Уведомления") {
+                    model.inbox.isOpen.toggle()
+                }
+                .keyboardShortcut("u", modifiers: [.command, .shift])
             }
         }
     }

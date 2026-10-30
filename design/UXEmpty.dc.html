@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Crosskit — первый запуск</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+button{font:inherit;color:inherit;text-align:left;border:0;background:none;padding:0;margin:0;cursor:pointer}
+button:focus-visible{outline:2px solid #0a64d8;outline-offset:2px;border-radius:8px}
+input{font:inherit}
+</style>
+</helmet>
+<div style="--fg:#1c1c1e; --fg2:rgba(28,28,30,0.72); --fg3:rgba(28,28,30,0.6); --sep:rgba(0,0,0,0.1); --accent:#0a64d8; --accentText:#0a58bd; height: 1050px; display: flex; background: #ffffff; color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif; font-size: 13px; line-height: 18px; -webkit-font-smoothing: antialiased; overflow: hidden">
+
+  <nav aria-label="Проекты и задачи" style="flex: 0 0 240px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; padding: 14px 10px 12px; background: #f4f4f6; border-right: 0.5px solid var(--sep)">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 2px 0 6px; min-height: 28px">
+      <span style="display: flex; gap: 8px" aria-hidden="true">
+        <span style="width: 12px; height: 12px; border-radius: 6px; background: #ff5f57"></span>
+        <span style="width: 12px; height: 12px; border-radius: 6px; background: #febc2e"></span>
+        <span style="width: 12px; height: 12px; border-radius: 6px; background: #28c840"></span>
+      </span>
+      <span style="flex: 1"></span>
+      <button aria-label="Поиск по задачам и чатам (⌘F)" title="Поиск появится, когда будут беседы" style="width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: rgba(28,28,30,0.35)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.75"></circle><path d="M10.5 10.5l3.5 3.5"></path></svg>
+      </button>
+    </div>
+    <sc-if value="{{ noProjects }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 8px; padding: 18px 10px; border-radius: 12px; text-align: center; color: var(--fg2); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08)">
+        <span style="font-weight: 600; color: var(--fg)">Проектов пока нет</span>
+        <span style="font-size: 12px">Проект — это папка или репозиторий, где вы работаете с агентами.</span>
+        <button onClick="{{ addProject }}" style="align-self: center; height: 28px; padding: 0 12px; border-radius: 8px; font-weight: 600; color: #fff; background: var(--accent)">+ Добавить проект</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ hasProject }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 1px">
+        <span style="display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 8px; font-weight: 600; background: rgba(10,100,216,0.12)">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 4.5h4.5l1.5 1.5H14v6.5H2z"></path></svg>
+          <span style="flex: 1">payments-api</span>
+          <span style="font-size: 11px; font-weight: 400; color: var(--fg3)">0</span>
+        </span>
+        <span style="padding: 4px 8px 4px 28px; font-size: 12px; color: var(--fg3)">задачи появятся после первых чатов</span>
+      </div>
+      <button onClick="{{ addProject }}" style="height: 28px; padding: 0 8px; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--accentText)">+ Добавить проект</button>
+    </sc-if>
+    <div style="flex: 1"></div>
+    <div style="display: flex; align-items: center; gap: 6px; padding: 10px 2px 0; border-top: 0.5px solid var(--sep)">
+      <button aria-label="Настройки Crosskit (⌘,)" title="Настройки Crosskit (⌘,)" style="flex: none; width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--fg2); background: rgba(0,0,0,0.06)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path stroke-linejoin="round" d="M6.8 1.5h2.4l.35 1.75a5 5 0 0 1 1.3.75l1.7-.57 1.2 2.08-1.35 1.18a5 5 0 0 1 0 1.5l1.35 1.18-1.2 2.08-1.7-.57a5 5 0 0 1-1.3.75L9.2 14.5H6.8l-.35-1.75a5 5 0 0 1-1.3-.75l-1.7.57-1.2-2.08 1.35-1.18a5 5 0 0 1 0-1.5L2.25 6.06l1.2-2.08 1.7.57a5 5 0 0 1 1.3-.75z"></path><circle cx="8" cy="8" r="2"></circle></svg>
+      </button>
+      <span style="flex: 1; min-width: 0; height: 32px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 9px; font-weight: 600; background: rgba(0,0,0,0.06)">
+        <span aria-hidden="true" style="width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; background: #0a64d8">Р</span>
+        <span style="flex: 1">Работа</span>
+        <span aria-hidden="true" style="color: var(--fg3)">▾</span>
+      </span>
+    </div>
+  </nav>
+
+  <aside aria-label="Расширения" style="flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; background: #fbfbfd">
+    <div role="tablist" aria-label="Расширения" style="flex: none; display: flex; align-items: center; gap: 4px; padding: 8px 10px; border-bottom: 0.5px solid var(--sep); background: #ffffff">
+      <span role="tab" aria-selected="true" style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #0a58bd; background: rgba(10,100,216,0.1); box-shadow: inset 0 0 0 1px rgba(10,100,216,0.35)">Карта решений</span>
+      <sc-for list="{{ dimTabs }}" as="d" hint-placeholder-count="4">
+        <span role="tab" aria-selected="false" aria-disabled="true" title="Появится, когда в проекте будут чаты" style="height: 30px; padding: 0 10px; display: flex; align-items: center; border-radius: 8px; font-size: 12px; font-weight: 600; color: rgba(28,28,30,0.35)">{{ d }}</span>
+      </sc-for>
+    </div>
+
+    <div style="flex: 1; min-height: 0; overflow-y: auto; display: flex; justify-content: center; padding: 56px 32px 32px">
+      <div style="width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 24px">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+          <svg width="88" height="72" viewBox="0 0 88 72" fill="none" aria-hidden="true">
+            <path d="M14 8 Q14 30 40 32" stroke="#1c1c1e" stroke-width="2" stroke-linecap="round"></path>
+            <path d="M40 32 Q40 52 66 54" stroke="#1c1c1e" stroke-width="2" stroke-linecap="round"></path>
+            <path d="M40 32 Q34 44 28 50" stroke="rgba(28,28,30,0.3)" stroke-width="1.5" stroke-linecap="round"></path>
+            <path d="M66 54 Q72 62 76 66" stroke="#0a64d8" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round"></path>
+            <circle cx="14" cy="8" r="5" fill="#1c1c1e"></circle>
+            <circle cx="40" cy="32" r="4" fill="#1c1c1e"></circle>
+            <circle cx="28" cy="50" r="5" fill="#ececf0" stroke="rgba(28,28,30,0.3)"></circle>
+            <circle cx="66" cy="54" r="7" fill="#1e7d3a"></circle>
+            <circle cx="76" cy="66" r="5" fill="#fff" stroke="#0a64d8" stroke-width="1.5"></circle>
+          </svg>
+          <h1 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 700">Здесь появится карта решений</h1>
+          <p style="margin: 0; max-width: 520px; color: var(--fg2)">Crosskit читает ваши беседы с Claude Code и Codex, собирает их в задачи и показывает, что решили, что отвергли и что осталось без ответа. Всё хранится на этом компьютере.</p>
+        </div>
+
+        <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+            <li style="display: flex; gap: 14px; padding: 16px; border-radius: 14px; background: #fff; box-shadow: {{ st.ring }}; opacity: {{ st.opacity }}">
+              <span aria-hidden="true" style="width: 28px; height: 28px; flex: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: {{ st.numFg }}; background: {{ st.numBg }}">{{ st.mark }}</span>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                <b style="font-size: 15px">{{ st.title }}</b>
+                <span style="color: var(--fg2)">{{ st.text }}</span>
+                <sc-for list="{{ st.found }}" as="f" hint-placeholder-count="0">
+                  <span style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 9px; background: rgba(0,0,0,0.035)">
+                    <span aria-hidden="true" style="width: 18px; height: 18px; flex: none; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; background: {{ f.color }}">{{ f.mono }}</span>
+                    <b style="font-weight: 600">{{ f.name }}</b>
+                    <span style="flex: 1; color: var(--fg2)">{{ f.text }}</span>
+                    <span style="font-size: 12px; font-weight: 600; color: {{ f.stateColor }}">{{ f.state }}</span>
+                  </span>
+                </sc-for>
+                <sc-if value="{{ st.hasActions }}" hint-placeholder-val="{{ true }}">
+                  <span style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px">
+                    <sc-for list="{{ st.actions }}" as="a" hint-placeholder-count="1">
+                      <button onClick="{{ a.run }}" style="height: 30px; padding: 0 14px; border-radius: 8px; font-weight: 600; color: {{ a.fg }}; background: {{ a.bg }}">{{ a.label }}</button>
+                    </sc-for>
+                  </span>
+                </sc-if>
+              </div>
+            </li>
+          </sc-for>
+        </ol>
+        <span style="text-align: center; font-size: 12px; color: var(--fg3)">Чтение бесед стоит денег (около 1 цента за реплику) и запускается только по вашей команде — с ценой заранее.</span>
+      </div>
+    </div>
+  </aside>
+
+  <main style="flex: 0 0 560px; min-width: 0; height: 100%; display: flex; flex-direction: column; border-left: 0.5px solid var(--sep); background: #ffffff">
+    <header style="display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 10px 0 16px; box-sizing: border-box; border-bottom: 0.5px solid var(--sep)">
+      <b style="flex: 1">Чат</b>
+      <button aria-label="Уведомления: нет новых" title="Центр уведомлений" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: rgba(28,28,30,0.75)">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5V7a4 4 0 0 1 8 0v4.5l1.2 1.3H2.8z"></path><path d="M6.5 14.2a1.6 1.6 0 0 0 3 0"></path></svg>
+      </button>
+    </header>
+    <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; text-align: center">
+      <svg width="40" height="40" viewBox="0 0 16 16" fill="none" stroke="rgba(28,28,30,0.3)" stroke-width="1" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3h11v7.5H7l-3 2.5v-2.5H2.5z"></path></svg>
+      <b style="font-size: 15px">Чатов пока нет</b>
+      <span style="max-width: 340px; color: var(--fg2)">{{ chatHint }}</span>
+    </div>
+    <div style="padding: 10px 20px 14px">
+      <label style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 8px 0 14px; border-radius: 14px; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.04)">
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Сообщение агенту</span>
+        <input type="text" placeholder="{{ composerPlaceholder }}" style="flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); outline: none">
+        <button style="height: 30px; padding: 0 12px; border-radius: 9px; font-weight: 600; color: #fff; background: var(--accent)">{{ sendText }}</button>
+      </label>
+      <div style="display: flex; align-items: center; gap: 4px; padding: 8px 0 0; font-size: 12px; white-space: nowrap">
+        <span title="Быстрый вопрос" style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #4b3aa0; background: rgba(98,70,200,0.1)">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.5 1 3 9h4l-1 6 6.5-8h-4z"></path></svg>
+        </span>
+        <span style="height: 28px; padding: 0 8px; border-radius: 8px; display: flex; align-items: center; gap: 5px; font-weight: 600; background: rgba(0,0,0,0.05)"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; background: #c46a45">C</span>Claude Code ▾</span>
+        <span style="height: 28px; padding: 0 8px; border-radius: 8px; display: flex; align-items: center; font-weight: 600; background: rgba(0,0,0,0.05)">Sonnet ▾</span>
+        <span style="height: 28px; padding: 0 8px; border-radius: 8px; display: flex; align-items: center; font-weight: 600; background: rgba(0,0,0,0.05)">Спрашивать ▾</span>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1920,"height":1050}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { scanned: false, project: false, built: false }; }
+  renderVals() {
+    const s = this.state;
+    const done = (b) => b;
+    const prim = (label, run) => ({ label: label, run: run, fg: '#fff', bg: '#0a64d8' });
+    const sec = (label, run) => ({ label: label, run: run, fg: '#1c1c1e', bg: 'rgba(0,0,0,0.06)' });
+    const stepState = (isDone, isActive) => ({
+      ring: isActive ? '0 0 0 1.5px #0a64d8, 0 6px 18px rgba(10,100,216,0.1)' : '0 0 0 0.5px rgba(0,0,0,0.1)',
+      opacity: isDone || isActive ? '1' : '0.6',
+      numFg: isDone ? '#fff' : (isActive ? '#fff' : 'rgba(28,28,30,0.6)'),
+      numBg: isDone ? '#1e7d3a' : (isActive ? '#0a64d8' : 'rgba(0,0,0,0.07)')
+    });
+    const steps = [
+      Object.assign({ mark: s.scanned ? '✓' : '1', title: 'Найти агентов на этом компьютере',
+        text: s.scanned ? 'Нашли, где лежат беседы. Ничего не прочитано и не отправлено.' : 'Crosskit посмотрит, какие агенты установлены и где они хранят беседы. Только имена файлов — содержимое не читается.',
+        found: s.scanned ? [
+          { name: 'Claude Code', mono: 'C', color: '#c46a45', text: '128 бесед в 7 папках', state: 'найден', stateColor: '#1e7d3a' },
+          { name: 'Codex', mono: 'X', color: '#4a4d55', text: '34 беседы в 3 папках', state: 'найден', stateColor: '#1e7d3a' }
+        ] : [],
+        actions: s.scanned ? [] : [prim('Найти агентов', () => this.setState({ scanned: true })), sec('Указать папку вручную', () => {})] }, stepState(s.scanned, !s.scanned)),
+      Object.assign({ mark: s.project ? '✓' : '2', title: 'Добавить первый проект',
+        text: s.project ? 'payments-api: 5 бесед в Claude Code и Codex за 3–15 октября. Crosskit предложит, как сгруппировать их в задачи.' : 'Выберите папку или репозиторий. Можно добавить несколько папок в один проект — например, бэкенд и фронтенд.',
+        found: s.project ? [{ name: '~/work/payments-api', mono: '⎇', color: '#c46a45', text: 'ветка main', state: '5 бесед', stateColor: '#0a58bd' }] : [],
+        actions: s.project ? [] : (s.scanned ? [prim('Выбрать папку…', () => this.setState({ project: true })), sec('Из списка найденных (7)', () => this.setState({ project: true }))] : []) }, stepState(s.project, s.scanned && !s.project)),
+      Object.assign({ mark: s.built ? '✓' : '3', title: 'Построить первую карту',
+        text: s.built ? 'Карта строится — займёт 2–4 минуты. Можно уже начинать чат справа.' : 'Модель прочитает беседы проекта и найдёт развилки, решения и риски. Для 5 бесед (≈ 530 реплик) — около 5 $.',
+        found: [],
+        actions: s.built ? [] : (s.project ? [prim('Построить карту за ≈ 5 $', () => this.setState({ built: true })), sec('Позже — сначала чат', () => {})] : []) }, stepState(s.built, s.project && !s.built))
+    ].map((x) => Object.assign(x, { hasActions: x.actions.length > 0 }));
+    return {
+      noProjects: !s.project, hasProject: s.project,
+      addProject: () => this.setState({ scanned: true, project: true }),
+      dimTabs: ['Канбан', 'Изменения', 'Файлы', 'Браузер'],
+      steps: steps,
+      chatHint: s.project ? 'Начните чат в payments-api — агент получит карту проекта, когда она будет готова.' : 'Можно спросить агента прямо сейчас, без проекта — например, быстрым вопросом. Чаты по проекту появятся после шага 2.',
+      composerPlaceholder: s.project ? 'Новый чат в payments-api' : 'Спросить агента без проекта',
+      sendText: s.project ? 'Начать чат' : 'Спросить'
+    };
+  }
+}
+</script>
+</body>
+</html>

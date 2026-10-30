@@ -1,7 +1,8 @@
 import CrosskitKit
 import Foundation
 
-/// Слова окна: состояния, уровни, отказы службы. Окно говорит по-русски, как и панель.
+/// Слова окна: состояния, уровни, отказы службы. Окно говорит по-русски, как и панель, и
+/// человеческими словами, а не жаргоном ядра: «сейчас», а не HEAD; «прочитано», а не «размечено».
 enum Wording {
 
     static let locale = Locale(identifier: "ru_RU")
@@ -12,14 +13,14 @@ enum Wording {
         case .rejected: "✗"
         case .deferred: "○"
         case .open: "?"
-        case .agentDefault: "ᵃ"
+        case .agentDefault: "А"
         case .abandoned: "⊘"
         }
     }
 
     static func label(_ state: BranchState) -> String {
         switch state {
-        case .chosen: "выбрал владелец"
+        case .chosen: "выбрали вы"
         case .rejected: "отклонено"
         case .deferred: "отложено"
         case .open: "ждёт решения"
@@ -36,12 +37,21 @@ enum Wording {
         }
     }
 
-    static func label(_ mode: MapMode) -> String {
-        switch mode {
-        case .line: "Основная линия"
-        case .conversations: "Беседы"
-        case .risks: "Риски"
+    /// Уровень риска словом: critical — то, что ломает прод, деньги, данные или секреты.
+    static func label(_ level: RiskLevel) -> String {
+        switch level {
+        case .critical: "Критично"
+        case .high: "Важно"
+        case .medium: "Допущение"
+        case .info: "Мелочь"
         }
+    }
+
+    /// Почему сшивка связала беседы кандидата, одной фразой.
+    static func why(_ candidate: CandidateTask) -> String? {
+        let signals = Set(candidate.conversations.flatMap(\.signals))
+        guard !signals.isEmpty else { return nil }
+        return "связаны: " + signals.sorted().joined(separator: ", ")
     }
 
     /// Почему книга задач не приняла решение — по виду отказа, который служба отдаёт данными.
@@ -49,7 +59,7 @@ enum Wording {
         let task = declined.task.map { "«\($0)»" } ?? "задача"
         switch declined.kind {
         case "open-critical-risks":
-            return "У \(task) ещё \(count(declined.count ?? 0, "открытый критичный риск", "открытых критичных риска", "открытых критичных рисков")). Задачу с открытым critical нельзя отметить готовой: сначала примите или закройте его с причиной."
+            return "У \(task) ещё \(count(declined.count ?? 0, "открытый критичный риск", "открытых критичных риска", "открытых критичных рисков")). Задачу с открытым критичным риском нельзя отметить готовой: сначала примите или закройте его с причиной."
         case "empty-reason":
             return "Решение о риске хранит причину: напишите, почему."
         case "no-risk-decision":
@@ -73,15 +83,6 @@ enum Wording {
         }
     }
 
-    static func title(_ column: TaskColumn) -> String {
-        switch column {
-        case .unmapped: "Не размечены"
-        case .inWork: "В работе"
-        case .waiting: "Ждут решения"
-        case .done: "Готово"
-        }
-    }
-
     /// Слово владельца о риске, коротко: «принят вами 30 окт».
     static func decided(_ decided: Decided) -> String {
         let verb = decided.verdict == .resolved ? "закрыт" : "принят"
@@ -89,7 +90,7 @@ enum Wording {
     }
 
     static func speaker(owner: Bool) -> String {
-        owner ? "Владелец" : "Агент"
+        owner ? "вы" : "агент"
     }
 
     static func day(_ date: Date?) -> String {
@@ -101,8 +102,11 @@ enum Wording {
         platform == .codex ? "Codex" : "Claude Code"
     }
 
-    /// Команда, которой беседу продолжают в её инструменте. Окно не управляет чужим
-    /// приложением, а отдаёт команду в буфер обмена, как панель.
+    static func usd(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(2)).locale(locale)) + " $"
+    }
+
+    /// Команда, которой беседу продолжают в её инструменте.
     static func resume(session: String, platform: Platform?) -> String {
         platform == .codex ? "codex resume \(session)" : "claude --resume \(session)"
     }
@@ -112,6 +116,11 @@ enum Wording {
         let units = number % 10
         let word = (11...14).contains(tens) ? many : units == 1 ? one : (2...4).contains(units) ? few : many
         return "\(number) \(word)"
+    }
+
+    /// Путь для человека: домашний каталог — тильдой.
+    static func path(_ path: String) -> String {
+        path.replacingOccurrences(of: NSHomeDirectory(), with: "~")
     }
 
     /// Что сказать человеку, когда служба не дала ответа. `state` — что служба сама пишет о
@@ -136,6 +145,8 @@ enum Wording {
              "Окно и служба говорят на разных версиях протокола. Пересоберите ядро и выполните crosskit service restart.")
         case .refused("overloaded"):
             ("Служба занята", "Она отвечает на столько вопросов сразу, сколько берёт. Обновите позже (⌘R).")
+        case .refused("malformed"):
+            ("Служба старее окна", "Она не знает вопроса, который задало окно. Выполните crosskit service restart.")
         case .refused(let reason):
             ("Служба отказала", "Причина: \(reason).")
         case .commandRefused(let category):

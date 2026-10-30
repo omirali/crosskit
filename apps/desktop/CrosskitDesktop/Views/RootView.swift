@@ -1,33 +1,52 @@
 import CrosskitKit
 import SwiftUI
 
-/// Окно: задачи слева, доска или карта выбранной задачи в середине, узел — в инспекторе справа.
+/// Окно (макет `design/UXMain.dc.html`): слева проекты и задачи, в середине карта и расширения
+/// вокруг задачи, справа — чат с агентом. Карта и чат связаны: узел открывает свою реплику, а
+/// у реплики видно, что из неё стало на карте.
 struct RootView: View {
 
     @Bindable var model: DesktopModel
-    /// Окно спрашивает, тратить ли лимит, прежде чем строить.
-    @State private var askingToBuild = false
-    /// Каталог новой беседы неизвестен — его выбирает человек.
-    @State private var choosingDirectory = false
-    @Environment(\.openWindow) private var openWindow
+    @State private var terminal = TerminalModel()
+    @State private var browser = BrowserModel()
 
     var body: some View {
         NavigationSplitView {
-            TaskSidebar(model: model)
-                .navigationSplitViewColumnWidth(min: 230, ideal: 270, max: 340)
+            ProjectSidebar(model: model)
+                .navigationSplitViewColumnWidth(min: 220, ideal: 250, max: 320)
         } detail: {
-            detail
+            HSplitView {
+                WorkPane(model: model, terminal: terminal, browser: browser)
+                    .frame(minWidth: 460, maxWidth: .infinity)
+                HStack(spacing: 0) {
+                    if model.showsChats {
+                        ChatList(model: model)
+                            .frame(width: 250)
+                        Divider()
+                    }
+                    ChatPane(model: model, terminal: terminal)
+                        .frame(minWidth: 380, idealWidth: 500, maxWidth: 720)
+                }
+            }
         }
-        .inspector(isPresented: $model.inspectorShown) {
-            inspector
-                .inspectorColumnWidth(min: 280, ideal: 340, max: 440)
-        }
-        .toolbar { toolbar }
+        .navigationTitle(model.context ?? "Crosskit")
         .task { await model.start() }
-        .task(id: model.choice) { await model.loadMap() }
-        .onChange(of: model.context) {
-            model.choice = .board
-            Task { await model.loadBoard() }
+        .task(id: model.taskID) {
+            if let id = model.taskID { await model.loadTask(id) }
+        }
+        .task(id: model.shownChatKey) {
+            // Беседа проекта — из чужой задачи: её реплики и карта нужны чату.
+            if let key = model.shownChatKey, let id = model.taskID(of: key), id != model.taskID,
+               model.speech(of: id).value == nil {
+                await model.loadTask(id)
+            }
+        }
+        .onAppear {
+            // Браузер не держит окно: только строку ввода, и цикла владения нет.
+            let composer = model.composer
+            browser.handOff = { text in
+                composer.draft = composer.draft.isEmpty ? text : composer.draft + " " + text
+            }
         }
         .sheet(item: $model.nameRequest) { request in
             NameSheet(request: request) { decision in
@@ -45,122 +64,19 @@ struct RootView: View {
             BuildSheet(model: model)
                 .interactiveDismissDisabled(model.build?.finished == false)
         }
-        .confirmationDialog(buildQuestion, isPresented: $askingToBuild, titleVisibility: .visible) {
-            Button("Построить") { model.startBuild() }
-            Button("Отмена", role: .cancel) {}
-        } message: {
-            Text("Модель прочитает реплики, которых не покрывает ни одна карта, и потратит лимит подписки. Цену точно назовёт сам claude.")
-        }
-        .fileImporter(isPresented: $choosingDirectory, allowedContentTypes: [.folder]) { result in
-            if case .success(let url) = result, let task = model.confirmedTask {
-                continueTask(task, in: url.path)
+        .fileImporter(isPresented: Binding(get: { model.composer.waitingForDirectory != nil },
+                                           set: { if !$0 { model.composer.waitingForDirectory = nil } }),
+                      allowedContentTypes: [.folder]) { result in
+            let text = model.composer.waitingForDirectory
+            model.composer.waitingForDirectory = nil
+            if case .success(let url) = result, let text {
+                model.startChat(saying: text, in: url.path)
             }
         }
         .alert(model.notice?.title ?? "", isPresented: Binding(get: { model.notice != nil }, set: { if !$0 { model.notice = nil } })) {
             Button("Понятно") { model.notice = nil }
         } message: {
             Text(model.notice?.explanation ?? "")
-        }
-    }
-
-    @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
-        if let task = model.confirmedTask {
-            ToolbarItem(placement: .principal) {
-                Picker("Вид", selection: $model.mode) {
-                    ForEach(MapMode.allCases) { mode in
-                        Text(Wording.label(mode)).tag(mode)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
-            ToolbarItem {
-                Toggle("Отклонённые ветки", systemImage: "arrow.triangle.branch", isOn: $model.showsRejected)
-                    .help("Показывать отклонённые и отложенные ветки")
-                    .disabled(model.mode != .line)
-            }
-            ToolbarItem {
-                Button("Продолжить задачу", systemImage: "bubble.left.and.text.bubble.right") {
-                    if let directory = Self.latestDirectory(of: task) {
-                        continueTask(task, in: directory)
-                    } else {
-                        choosingDirectory = true
-                    }
-                }
-                .help("Новая беседа с Claude Code в каталоге задачи; агент получит основную линию, отказы и риски")
-            }
-            ToolbarItem {
-                Button("Достроить карту", systemImage: "hammer") { askingToBuild = true }
-                    .help("Разметить реплики, которых не покрывает ни одна карта")
-                    .disabled(model.estimate?.unmappedReplies ?? 0 == 0 || model.build != nil)
-            }
-            ToolbarItem {
-                Menu("Задача", systemImage: "ellipsis.circle") {
-                    TaskActions(model: model, task: task)
-                }
-            }
-        }
-        ToolbarItem {
-            Button("Обновить", systemImage: "arrow.clockwise") {
-                Task { await model.reload() }
-            }
-            .help("Спросить службу заново (⌘R)")
-        }
-        ToolbarItem {
-            Button("Узел", systemImage: "sidebar.right") {
-                model.inspectorShown.toggle()
-            }
-            .help("Показать или спрятать узел")
-        }
-    }
-
-    /// Где шла последняя беседа задачи, чей журнал ещё на диске.
-    static func latestDirectory(of task: ConfirmedTask) -> String? {
-        task.conversations
-            .filter { $0.workingDirectory != nil }
-            .max { ($0.lastAtUnixMs ?? 0) < ($1.lastAtUnixMs ?? 0) }?
-            .workingDirectory
-    }
-
-    private func continueTask(_ task: ConfirmedTask, in directory: String) {
-        var brief: String?
-        if case .loaded(let loaded) = model.map { brief = TaskBrief.of(loaded.tree) }
-        openWindow(value: ChatTarget(taskID: task.id, taskName: task.name, context: model.context,
-                                     directory: directory, resume: nil, brief: brief))
-    }
-
-    private var buildQuestion: String {
-        guard let estimate = model.estimate else { return "Достроить карту?" }
-        let replies = Wording.count(estimate.unmappedReplies, "реплика", "реплики", "реплик")
-        let usd = estimate.usd.formatted(.number.precision(.fractionLength(1)).locale(Wording.locale))
-        return "Достроить карту: \(replies) в \(Wording.count(estimate.conversations, "беседе", "беседах", "беседах")), около \(usd) $?"
-    }
-
-    @ViewBuilder
-    private var detail: some View {
-        if case .failed(let error) = model.board {
-            ServiceUnavailable(error: error, state: model.contextState)
-        } else if case .loaded(let board) = model.board, model.choice == .board {
-            TaskBoardView(model: model, board: board)
-        } else if let candidate = model.candidate {
-            CandidateView(model: model, candidate: candidate)
-        } else if let task = model.confirmedTask {
-            TaskMapScreen(model: model, task: task, build: { askingToBuild = true })
-        } else if case .loaded = model.board {
-            ContentUnavailableView("Выберите задачу", systemImage: "point.3.connected.trianglepath.dotted",
-                                   description: Text("Слева — доска, задачи, которые вы подтвердили, и кандидаты сшивки."))
-        } else {
-            ProgressView("Спрашиваю службу…")
-        }
-    }
-
-    @ViewBuilder
-    private var inspector: some View {
-        if case .loaded(let loaded) = model.map, let task = model.confirmedTask {
-            NodeInspector(model: model, tree: loaded.tree, task: task)
-        } else {
-            ContentUnavailableView("Узел не выбран", systemImage: "cursorarrow.click",
-                                   description: Text("Выберите развилку или риск на карте."))
         }
     }
 }
