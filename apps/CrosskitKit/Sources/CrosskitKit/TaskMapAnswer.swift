@@ -27,6 +27,18 @@ public struct JoinedItem: Decodable, Sendable, Equatable {
     public let state: String
     public let level: RiskLevel?
     public let sources: [JoinedSource]
+    /// Слово владельца о риске, сильнее `state` (ADR 0061).
+    public let decided: Decided?
+}
+
+/// Что владелец решил о риске, когда и почему.
+public struct Decided: Decodable, Sendable, Equatable, Hashable {
+    /// `accepted` или `resolved`.
+    public let verdict: RiskStatus
+    public let reason: String
+    public let atUnixMs: Int64
+
+    public var at: Date { Date(unixMilliseconds: atUnixMs) }
 }
 
 /// Узел карты беседы, на котором стоит пункт сводки: `c0.f3` — развилка 3, `c1.r5` — риск 5.
@@ -88,6 +100,7 @@ public struct MapRisk: Decodable, Sendable, Equatable {
     public let reply: Int
     public let owner: Bool?
     public let quote: String
+    public let decided: Decided?
 }
 
 /// Что стало с веткой на развилке (`docs/decision-map.md`, раздел 3).

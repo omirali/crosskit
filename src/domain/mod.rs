@@ -52,13 +52,14 @@ mod project_signals;
 mod proposed_context;
 mod reconcile;
 mod reply_chunk;
+/// The owner's decisions about tasks, laid over what stitching proposes (ADR 0053).
+pub mod risk_decision;
 mod run_retention;
 mod search_rank;
 mod source_commit;
 mod source_language;
 mod source_path;
 mod suffix_stemming;
-/// The owner's decisions about tasks, laid over what stitching proposes (ADR 0053).
 mod task_book;
 /// Which conversations belong to one task, by facts their logs record (ADR 0051, ADR 0052).
 pub(crate) mod task_stitching;
@@ -141,7 +142,7 @@ pub use search_rank::DocumentCursor;
 pub use source_commit::{AnalysisRequest, SourceCommit};
 pub use source_language::{SUFFIX_TABLE_VERSION, SourceLanguage};
 pub use source_path::{NormalizedPath, PathError};
-pub use task_book::{ConfirmedTask, TaskBook, TaskBookError};
+pub use task_book::{ConfirmedTask, RestoredTask, TaskBook, TaskBookError};
 pub use text_normalization::{
     Normalization, NormalizationError, NormalizationSet, SnowballLanguage, StemRule,
     SuffixRuleError, SuffixRules, SuffixStep,

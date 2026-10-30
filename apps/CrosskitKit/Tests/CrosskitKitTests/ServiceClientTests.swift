@@ -8,7 +8,7 @@ struct ServiceClientTests {
 
     /// Поддельная служба: одно соединение, одна строка вопроса, ответ `answer`. Возвращает
     /// каталог `service/` и то, что спросили.
-    private func serving(_ answer: String) throws -> (URL, Task<String, Never>) {
+    private func serving(_ answer: String, after delay: Duration = .zero) throws -> (URL, Task<String, Never>) {
         // Короткий путь: адрес сокета вмещает 104 байта.
         let directory = URL(fileURLWithPath: "/tmp/ck-\(UUID().uuidString.prefix(8))/service")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -23,12 +23,16 @@ struct ServiceClientTests {
             }
         }
         try #require(bound == 0 && listen(listener, 1) == 0)
-        let asked = Task.detached { () -> String in
+        let asked = Task.detached { () async -> String in
             let peer = accept(listener, nil, nil)
             defer { close(peer); close(listener) }
+            // Клиент, у которого вышел срок, уже ушёл: запись ему не должна ронять тесты.
+            var noSignal: Int32 = 1
+            setsockopt(peer, SOL_SOCKET, SO_NOSIGPIPE, &noSignal, socklen_t(MemoryLayout<Int32>.size))
             var question = Data()
             var byte: UInt8 = 0
             while read(peer, &byte, 1) == 1, byte != 0x0A { question.append(byte) }
+            try? await Task.sleep(for: delay)
             let reply = Array((answer + "\n").utf8)
             _ = reply.withUnsafeBytes { write(peer, $0.baseAddress, reply.count) }
             return String(decoding: question, as: UTF8.self)
@@ -90,5 +94,13 @@ struct ServiceClientTests {
         #expect(await client.state(of: "work")?.waiting == "context work did not open")
         #expect(await client.state(of: "home")?.lastPass?.text == "Pass 1")
         #expect(await client.state(of: "nowhere") == nil)
+    }
+
+    @Test("Служба, которая молчит дольше срока, — это срок, а не нечитаемый ответ")
+    func silenceIsATimeout() async throws {
+        let (directory, _) = try serving(#"{"schema":2,"contexts":[]}"#, after: .seconds(1))
+        await #expect(throws: ServiceError.timedOut) {
+            _ = try await ServiceClient(serviceDirectory: directory, timeout: .milliseconds(200)).contexts()
+        }
     }
 }

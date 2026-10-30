@@ -45,6 +45,9 @@ impl Default for ServerLimits {
 /// How long the accepting loop waits before it looks whether the service is stopping.
 const STOP_LOOK: i32 = 250;
 
+/// How long a refused client is given to say its question and to take the refusal.
+const REFUSAL_WAIT: Duration = Duration::from_millis(100);
+
 /// Answers connections until the service stops, then removes the socket.
 pub fn serve(
     socket: PlacedSocket,
@@ -112,11 +115,18 @@ fn answer_one(stream: UnixStream, reads: &dyn ServedReads, limits: ServerLimits)
 
 /// `overloaded`, written without waiting: the line is far smaller than a socket's buffer, and
 /// a client that does not read it is not waited for.
+///
+/// The question is read first, for a moment. A connection closed with the client's question
+/// still on its way ends the client's write with an error, and the client gives up before it
+/// reads the refusal waiting for it: on 2026-10-30 that was three runs in five of the test
+/// below, and five in five on the commit before. A client that says nothing within the moment
+/// is not waited for any longer.
 fn refuse_at_once(stream: UnixStream, refused: Refused) {
-    if stream
-        .set_write_timeout(Some(Duration::from_millis(100)))
-        .is_ok()
-    {
+    if stream.set_read_timeout(Some(REFUSAL_WAIT)).is_ok() {
+        let mut question = String::new();
+        let _ = BufReader::new((&stream).take(REQUEST_LIMIT)).read_line(&mut question);
+    }
+    if stream.set_write_timeout(Some(REFUSAL_WAIT)).is_ok() {
         let mut writer = &stream;
         let _ = writer.write_all(format!("{}\n", refusal_line(refused)).as_bytes());
     }

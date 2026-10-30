@@ -6,6 +6,8 @@ struct TaskMapScreen: View {
 
     @Bindable var model: DesktopModel
     let task: ConfirmedTask
+    /// Спросить, строить ли карту: цену называет окно, решение — человек.
+    let build: () -> Void
 
     var body: some View {
         switch model.map {
@@ -14,7 +16,7 @@ struct TaskMapScreen: View {
         case .failed(let error):
             ServiceUnavailable(error: error)
         case .loaded(let loaded) where loaded.answer.conversations.allSatisfy({ $0.mappedThrough == 0 }):
-            NotMapped(task: task, answer: loaded.answer)
+            NotMapped(task: task, answer: loaded.answer, build: build)
         case .loaded(let loaded):
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -39,7 +41,7 @@ struct TaskMapScreen: View {
                                                        uniquingKeysWith: { first, _ in first }),
                              focus: $model.focus)
         case .conversations:
-            ConversationsList(answer: loaded.answer, task: task)
+            ConversationsList(model: model, answer: loaded.answer, task: task)
         case .risks:
             RisksList(tree: loaded.tree, focus: $model.focus)
         }
@@ -73,6 +75,9 @@ private struct MapHeader: View {
                     }
                     if !tree.joined {
                         Chip(text: "Сводки нет: шаги — развилки бесед по времени", tint: .orange)
+                    }
+                    if task.finishedAtUnixMs != nil {
+                        Chip(text: "Готово", tint: .green)
                     }
                 }
             }

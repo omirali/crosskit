@@ -44,6 +44,50 @@ enum Wording {
         }
     }
 
+    /// Почему книга задач не приняла решение — по виду отказа, который служба отдаёт данными.
+    static func sentence(_ declined: Declined) -> String {
+        let task = declined.task.map { "«\($0)»" } ?? "задача"
+        switch declined.kind {
+        case "open-critical-risks":
+            return "У \(task) ещё \(count(declined.count ?? 0, "открытый критичный риск", "открытых критичных риска", "открытых критичных рисков")). Задачу с открытым critical нельзя отметить готовой: сначала примите или закройте его с причиной."
+        case "empty-reason":
+            return "Решение о риске хранит причину: напишите, почему."
+        case "no-risk-decision":
+            return "О риске в реплике \(declined.reply ?? 0) вы ещё ничего не решали — возвращать нечего."
+        case "name-taken":
+            return "Задача «\(declined.name ?? "")» уже есть. Выберите другое имя."
+        case "empty-name":
+            return "У задачи должно быть имя."
+        case "no-such-task":
+            return "Задачи \(task) больше нет. Обновите список (⌘R)."
+        case "in-another-task":
+            return "Беседа \(declined.session ?? "") уже в \(task): сначала уберите её оттуда."
+        case "not-in-task":
+            return "Беседы \(declined.session ?? "") нет в \(task)."
+        case "unknown-conversation", "ambiguous-conversation":
+            return "Беседа \(declined.reference ?? "") не найдена однозначно. Обновите список (⌘R)."
+        case "no-conversations":
+            return "В задаче должна остаться хотя бы одна беседа."
+        default:
+            return "Книга задач отказала: \(declined.kind)."
+        }
+    }
+
+    static func title(_ column: TaskColumn) -> String {
+        switch column {
+        case .unmapped: "Не размечены"
+        case .inWork: "В работе"
+        case .waiting: "Ждут решения"
+        case .done: "Готово"
+        }
+    }
+
+    /// Слово владельца о риске, коротко: «принят вами 30 окт».
+    static func decided(_ decided: Decided) -> String {
+        let verb = decided.verdict == .resolved ? "закрыт" : "принят"
+        return "\(verb) вами \(day(decided.at))"
+    }
+
     static func speaker(owner: Bool) -> String {
         owner ? "Владелец" : "Агент"
     }
@@ -98,6 +142,11 @@ enum Wording {
             ("Служба не смогла ответить", "Категория отказа: \(category). Тот же вопрос из терминала скажет больше: crosskit tasks map <задача>.")
         case .noSuchTask(let task):
             ("Задачи «\(task)» нет", "В книге задач этого контекста её больше нет. Обновите список (⌘R).")
+        case .declined(let declined):
+            ("Решение не принято", sentence(declined))
+        case .timedOut:
+            ("Служба отвечает слишком долго",
+             "Обычно так бывает сразу после её перезапуска, пока она поднимает граф. Обновите через минуту (⌘R).")
         case .unreadable:
             ("Ответ не прочитан",
              "Служба ответила строкой, которую окно не понимает. Вероятно, служба старее окна: crosskit service restart.")

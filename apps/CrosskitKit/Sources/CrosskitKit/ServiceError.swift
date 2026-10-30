@@ -9,6 +9,10 @@ public enum ServiceError: Error, Equatable, Sendable {
     case commandRefused(category: String)
     /// В книге задач контекста такой задачи нет.
     case noSuchTask(String)
+    /// Книга задач не приняла решение владельца.
+    case declined(Declined)
+    /// Служба не ответила за отведённое время.
+    case timedOut
     /// Строка пришла, но это не ответ, который ждали.
     case unreadable
 }

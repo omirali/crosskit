@@ -38,17 +38,20 @@ public actor ServiceClient {
     }
 
     /// Карта задачи, как её показывает `tasks map <задача> --json`. Служба только показывает:
-    /// построение спрашивает модель и идёт командой.
+    /// построение спрашивает модель и идёт командой. Срок дольше обычного: служба собирает
+    /// реплики всех бесед задачи из графа, и сразу после своего старта отвечала дольше 10 с.
     public func taskMap(_ task: String, context: String?) async throws(ServiceError) -> TaskMapAnswer {
-        try await ask("task-map", context: context, arguments: [task, "--json"])
+        try await ask("task-map", context: context, arguments: [task, "--json"], timeout: Self.mapTimeout)
     }
 
+    static let mapTimeout: Duration = .seconds(60)
+
     func ask<Answer: Decodable & Sendable>(
-        _ op: String, context: String?, arguments: [String]
+        _ op: String, context: String?, arguments: [String], timeout: Duration? = nil
     ) async throws(ServiceError) -> Answer {
         let request = ServiceRequest(protocol: Self.protocolVersion, op: op, context: context, arguments: arguments)
         guard let line = try? JSONEncoder().encode(request) else { throw .unreadable }
-        let (socketPath, timeout) = (socketPath, timeout)
+        let (socketPath, timeout) = (socketPath, timeout ?? self.timeout)
         let exchanged: Result<Data, ServiceError> = await withCheckedContinuation { continuation in
             queue.async {
                 continuation.resume(returning: Result { () throws(ServiceError) -> Data in

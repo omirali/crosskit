@@ -49,13 +49,19 @@ public struct DecisionTree: Sendable, Equatable {
         /// Шаг, после которого риск появился.
         public let step: Int
         public let quotes: [Quote]
+        /// Слово владельца: принят или закрыт, почему и когда (ADR 0061).
+        public let decided: Decided?
 
         /// В скольких беседах риск поднимался.
         public var raisedIn: Int { Set(quotes.map(\.session)).count }
+        /// Открыт, пока ни карта, ни владелец его не закрыли.
+        public var isOpen: Bool { decided == nil && status == .open }
+        /// Статус с учётом слова владельца.
+        public var shownStatus: RiskStatus { decided?.verdict ?? status }
         /// Открытый критичный риск, который виден на линии полосой до HEAD. Только critical:
         /// на настоящей задаче открытых high двенадцать, и столько полос закрыли бы подписи
         /// веток. High остаются метками у своего шага.
-        public var pullsDown: Bool { !outside && status == .open && level == .critical }
+        public var pullsDown: Bool { !outside && isOpen && level == .critical }
     }
 
     public let task: String
@@ -92,7 +98,7 @@ public struct DecisionTree: Sendable, Equatable {
 
     /// Последний шаг — где задача стоит сейчас.
     public var head: Int? { steps.indices.last }
-    public var openRisks: [Risk] { risks.filter { !$0.outside && $0.status == .open } }
+    public var openRisks: [Risk] { risks.filter { !$0.outside && $0.isOpen } }
 }
 
 /// Чтение ответа ядра: как код узла сводки находит развилку или риск карты беседы.
@@ -176,14 +182,16 @@ private struct Reading {
         return DecisionTree.Risk(
             id: id, title: item.title, level: level, status: RiskStatus(rawValue: item.state) ?? .open,
             outside: outside, step: Self.step(at: position(of: item), among: positions),
-            quotes: found.map { quote($0.risk.quote, reply: $0.risk.reply, owner: $0.risk.owner, of: $0.conversation) })
+            quotes: found.map { quote($0.risk.quote, reply: $0.risk.reply, owner: $0.risk.owner, of: $0.conversation) },
+            decided: item.decided)
     }
 
     func risk(_ index: Int, from risk: MapRisk, of conversation: Int, positions: [Position?]) -> DecisionTree.Risk {
         DecisionTree.Risk(
             id: "r\(index)", title: risk.description, level: risk.level, status: risk.status, outside: !risk.inTask,
             step: Self.step(at: Position(conversation: conversation, reply: risk.reply), among: positions),
-            quotes: [quote(risk.quote, reply: risk.reply, owner: risk.owner, of: conversation)])
+            quotes: [quote(risk.quote, reply: risk.reply, owner: risk.owner, of: conversation)],
+            decided: risk.decided)
     }
 
     func forksInTime() -> [(fork: MapFork, conversation: Int)] {

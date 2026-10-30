@@ -155,3 +155,90 @@ fn a_task_map_keeps_what_a_quote_proves_and_is_grown_not_rebuilt() {
     );
     fs::remove_dir_all(root).unwrap();
 }
+
+/// The owner's word on a risk is kept in the book, shown on the board and on the map, and is
+/// what lets a task with a critical risk be marked done: never while one is open (ADR 0061).
+#[test]
+fn a_task_is_not_done_while_a_critical_risk_is_open_and_the_owners_word_closes_it() {
+    let sandbox = with_three_conversations("tasks-risks");
+    sandbox.write_config_sections("", "send_content_outside = true\n");
+    tasks(&sandbox, &["confirm", "bbbb", "--name", "Скидки"]);
+    let calls = sandbox.data_directory.join("tool-calls");
+    let (root, directory) = common::fake_map_engine(&calls);
+    let built = sandbox
+        .command(&["tasks", "map", "Скидки", "--build"])
+        .env("PATH", &directory)
+        .output()
+        .unwrap();
+    assert!(
+        built.status.success(),
+        "{}",
+        String::from_utf8_lossy(&built.stderr)
+    );
+    let board = || -> serde_json::Value {
+        serde_json::from_str(tasks(&sandbox, &["--json"]).trim()).unwrap()
+    };
+
+    let before = board();
+    assert_eq!(before["confirmed"][0]["progress"]["open_critical"], 1);
+    assert_eq!(before["confirmed"][0]["progress"]["steps"], 1);
+    let refused = sandbox.crosskit(&["tasks", "finish", "Скидки"]);
+    assert!(!refused.status.success());
+    let said = String::from_utf8_lossy(&refused.stderr);
+    assert!(said.contains("1 open critical risk"), "{said}");
+
+    tasks(
+        &sandbox,
+        &[
+            "accept",
+            "Скидки",
+            "aaaa1111",
+            "[1]",
+            "--reason",
+            "проверено руками",
+        ],
+    );
+    let after = board();
+    let progress = &after["confirmed"][0]["progress"];
+    assert_eq!(
+        (
+            progress["open_critical"].clone(),
+            progress["decided_risks"].clone()
+        ),
+        (0.into(), 1.into())
+    );
+    assert_eq!(
+        after["confirmed"][0]["risk_decisions"][0]["verdict"],
+        "accepted"
+    );
+    let map: serde_json::Value = serde_json::from_slice(
+        &sandbox
+            .crosskit(&["tasks", "map", "Скидки", "--json"])
+            .stdout,
+    )
+    .unwrap();
+    assert_eq!(
+        map["joined"]["risks"][0]["decided"]["reason"],
+        "проверено руками"
+    );
+    assert_eq!(
+        map["conversations"][0]["risks"][0]["decided"]["verdict"],
+        "accepted"
+    );
+    let text = tasks(&sandbox, &["map", "Скидки"]);
+    assert!(text.contains("accepted by you: проверено руками"), "{text}");
+
+    tasks(&sandbox, &["finish", "Скидки"]);
+    assert!(board()["confirmed"][0]["finished_at_unix_ms"].is_i64());
+    tasks(&sandbox, &["reopen", "Скидки", "aaaa1111", "1"]);
+    tasks(&sandbox, &["resume", "Скидки"]);
+    let reopened = board();
+    assert!(reopened["confirmed"][0]["finished_at_unix_ms"].is_null());
+    assert_eq!(reopened["confirmed"][0]["progress"]["open_critical"], 1);
+    assert_eq!(
+        fs::read_to_string(&calls).unwrap().lines().count(),
+        5,
+        "decisions and showing ask no model"
+    );
+    fs::remove_dir_all(root).unwrap();
+}

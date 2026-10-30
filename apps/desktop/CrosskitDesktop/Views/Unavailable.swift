@@ -18,6 +18,7 @@ struct ServiceUnavailable: View {
 struct NotMapped: View {
     let task: ConfirmedTask
     let answer: TaskMapAnswer
+    let build: () -> Void
 
     var body: some View {
         let replies = answer.conversations.map(\.replies).reduce(0, +)
@@ -26,6 +27,8 @@ struct NotMapped: View {
         } description: {
             Text("\(Wording.count(answer.conversations.count, "беседа", "беседы", "бесед")), \(Wording.count(replies, "реплика", "реплики", "реплик")). Построение спрашивает модель о каждой реплике и тратит лимит подписки.")
         } actions: {
+            Button("Построить карту…", action: build)
+                .buttonStyle(.borderedProminent)
             CommandBox(command: "crosskit --context \(answer.context) tasks map \"\(task.name)\" --build")
         }
     }
@@ -33,6 +36,7 @@ struct NotMapped: View {
 
 /// Кандидат в задачи: беседы, которые связала сшивка, и как его подтвердить.
 struct CandidateView: View {
+    let model: DesktopModel
     let candidate: CandidateTask
 
     var body: some View {
@@ -53,9 +57,10 @@ struct CandidateView: View {
                         .padding(.leading, 32)
                 }
             }
-            if let first = candidate.conversations.first {
-                CommandBox(command: "crosskit tasks confirm \(first.session.prefix(8)) --name \"\(first.title)\"")
+            HStack {
+                CandidateActions(model: model, candidate: candidate)
             }
+            .buttonStyle(.bordered)
         }
         .padding(32)
         .frame(maxWidth: 560, alignment: .leading)

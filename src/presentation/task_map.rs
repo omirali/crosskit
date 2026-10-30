@@ -20,6 +20,7 @@ use crate::application::{
 };
 use crate::domain::conversation::Speaker;
 use crate::domain::decision_map::{BranchState, RiskLevel, RiskStatus};
+use crate::domain::risk_decision::{RiskAnchor, RiskDecision, decision_for};
 use crate::domain::task_synthesis::{NodeRef, TaskRisk};
 use crate::domain::{CivilDate, WorkspaceName};
 use crate::infrastructure::analysis::map_engine;
@@ -28,6 +29,7 @@ use crate::infrastructure::{TaskBookFile, TaskMapFiles};
 use super::machine_answer::{self, SCHEMA, object_line, refusal_line};
 use super::reading_ground::{OwnRun, ReadingGround};
 use super::refusal::Refusal;
+use super::risk_decision_lines::{Decided, RiskDecisionLine};
 use super::service_client;
 use super::workspace;
 
@@ -186,7 +188,7 @@ pub(super) fn run(arguments: &[String], context: Option<&str>) -> Result<(), Str
     }
     match &joined {
         Some(joined) => {
-            print_task_map(&speech.task, &mapped, joined);
+            print_task_map(&speech, &mapped, joined);
             if words.detail {
                 print_map(&speech.task, &mapped, build);
             } else {
@@ -310,6 +312,8 @@ struct TaskSpeech {
     task: String,
     task_id: String,
     conversations: Vec<ConversationSpeech>,
+    /// The owner's word on the task's risks, from the task book (ADR 0061).
+    risk_decisions: Vec<RiskDecision>,
 }
 
 fn speech_of_task(task: &str, context: Option<&str>) -> Result<TaskSpeech, String> {
@@ -371,6 +375,11 @@ fn speech_answer(
         schema: SCHEMA,
         task: speech.task,
         task_id: speech.task_id,
+        risk_decisions: speech
+            .risk_decisions
+            .iter()
+            .map(RiskDecisionLine::from)
+            .collect(),
         conversations: speech
             .conversations
             .into_iter()
@@ -425,6 +434,7 @@ fn task_speech_on(
         task: found.name().to_string(),
         task_id: found.id().to_string(),
         conversations,
+        risk_decisions: found.risk_decisions().to_vec(),
     }))
 }
 
@@ -440,6 +450,9 @@ struct SpeechAnswer {
     task: String,
     task_id: String,
     conversations: Vec<SpokenConversation>,
+    /// A service older than ADR 0061 sends none.
+    #[serde(default)]
+    risk_decisions: Vec<RiskDecisionLine>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -484,6 +497,11 @@ impl SpeechAnswer {
                         .collect(),
                 })
                 .collect(),
+            risk_decisions: self
+                .risk_decisions
+                .iter()
+                .filter_map(RiskDecisionLine::decision)
+                .collect(),
         }
     }
 }
@@ -521,8 +539,17 @@ fn sources_of(nodes: &[NodeRef], joined: &ShownSynthesis, mapped: &[MappedConver
         .join(", ")
 }
 
-fn print_task_map(task: &str, mapped: &[MappedConversation], joined: &ShownSynthesis) {
+fn print_task_map(speech: &TaskSpeech, mapped: &[MappedConversation], joined: &ShownSynthesis) {
+    let task = &speech.task;
     let synthesis = &joined.stored.synthesis;
+    // The owner's word on a risk is stronger than the map's: open is what neither closed.
+    let decided = |risk: &TaskRisk| {
+        decision_for(
+            &speech.risk_decisions,
+            &anchors_of(&risk.nodes, joined, mapped),
+        )
+    };
+    let open = |risk: &&TaskRisk| risk.status == RiskStatus::Open && decided(risk).is_none();
     let mapped_count = mapped.iter().filter(|c| c.map.is_some()).count();
     println!(
         "{task} — the task's decision map, joined from {mapped_count} of {} conversation(s)",
@@ -539,15 +566,20 @@ fn print_task_map(task: &str, mapped: &[MappedConversation], joined: &ShownSynth
     }
     let print_risks = |risks: &[TaskRisk]| {
         let mut sorted: Vec<&TaskRisk> = risks.iter().collect();
-        sorted.sort_by_key(|risk| (risk.status != RiskStatus::Open, risk.level));
+        sorted.sort_by_key(|risk| (!open(risk), risk.level));
         for risk in sorted {
             let raised = match risk.conversations() {
                 0 | 1 => String::new(),
                 n => format!(" — raised in {n} conversations"),
             };
-            let status = match risk.status {
-                RiskStatus::Open => String::new(),
-                other => format!(" ({})", other.code()),
+            let status = match (decided(risk), risk.status) {
+                (Some(decision), _) => format!(
+                    " ({} by you: {})",
+                    decision.verdict.code(),
+                    cut(&decision.reason)
+                ),
+                (None, RiskStatus::Open) => String::new(),
+                (None, other) => format!(" ({})", other.code()),
             };
             println!(
                 "  ⚠ {:<8} {}{status}{raised}",
@@ -560,11 +592,7 @@ fn print_task_map(task: &str, mapped: &[MappedConversation], joined: &ShownSynth
     println!();
     println!(
         "Risks of the task ({} open of {})",
-        synthesis
-            .risks
-            .iter()
-            .filter(|risk| risk.status == RiskStatus::Open)
-            .count(),
+        synthesis.risks.iter().filter(open).count(),
         synthesis.risks.len()
     );
     print_risks(&synthesis.risks);
@@ -760,6 +788,9 @@ struct JoinedItem {
     state: &'static str,
     level: Option<&'static str>,
     sources: Vec<JoinedSource>,
+    /// The owner's word on a risk, stronger than `state` (ADR 0061).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    decided: Option<Decided>,
 }
 
 #[derive(Serialize)]
@@ -769,7 +800,28 @@ struct JoinedSource {
     reply: Option<usize>,
 }
 
-fn joined_of(joined: &ShownSynthesis, mapped: &[MappedConversation]) -> Joined {
+/// Where the quotes of `nodes` stand: the places an owner's decision on them is kept under.
+fn anchors_of(
+    nodes: &[NodeRef],
+    joined: &ShownSynthesis,
+    mapped: &[MappedConversation],
+) -> Vec<RiskAnchor> {
+    nodes
+        .iter()
+        .filter_map(|node| {
+            Some(RiskAnchor {
+                session: joined.stored.sessions.get(node.conversation())?.clone(),
+                reply: place_of(*node, joined, mapped)?.1,
+            })
+        })
+        .collect()
+}
+
+fn joined_of(
+    joined: &ShownSynthesis,
+    mapped: &[MappedConversation],
+    decisions: &[RiskDecision],
+) -> Joined {
     let sources = |nodes: &[NodeRef]| -> Vec<JoinedSource> {
         nodes
             .iter()
@@ -790,6 +842,8 @@ fn joined_of(joined: &ShownSynthesis, mapped: &[MappedConversation]) -> Joined {
                 state: risk.status.code(),
                 level: Some(risk.level.code()),
                 sources: sources(&risk.nodes),
+                decided: decision_for(decisions, &anchors_of(&risk.nodes, joined, mapped))
+                    .map(Decided::from),
             })
             .collect()
     };
@@ -805,6 +859,7 @@ fn joined_of(joined: &ShownSynthesis, mapped: &[MappedConversation]) -> Joined {
                 state: step.state.code(),
                 level: None,
                 sources: sources(&step.nodes),
+                decided: None,
             })
             .collect(),
         risks: risks(&synthesis.risks),
@@ -854,6 +909,8 @@ struct MapRisk<'a> {
     reply: usize,
     owner: bool,
     quote: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    decided: Option<Decided>,
 }
 
 fn map_line(
@@ -867,7 +924,7 @@ fn map_line(
         context: context.as_str(),
         task: &speech.task,
         question: crate::infrastructure::analysis::MAP_QUESTION_VERSION,
-        joined: joined.map(|joined| joined_of(joined, mapped)),
+        joined: joined.map(|joined| joined_of(joined, mapped, &speech.risk_decisions)),
         conversations: mapped
             .iter()
             .map(|conversation| {
@@ -912,6 +969,14 @@ fn map_line(
                             reply: risk.evidence.reply,
                             owner: owner(risk.evidence.reply),
                             quote: &risk.evidence.quote,
+                            decided: decision_for(
+                                &speech.risk_decisions,
+                                &[RiskAnchor {
+                                    session: conversation.session_id.clone(),
+                                    reply: risk.evidence.reply,
+                                }],
+                            )
+                            .map(Decided::from),
                         })
                         .collect(),
                     kept: map.map_or(0, |map| map.tally.kept),

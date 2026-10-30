@@ -4,11 +4,31 @@ import SwiftUI
 /// Беседы задачи: сколько каждой размечено и что в её карте.
 struct ConversationsList: View {
 
+    let model: DesktopModel
     let answer: TaskMapAnswer
     let task: ConfirmedTask
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
+            if !task.proposed.isEmpty {
+                Text("ПРЕДЛАГАЕТ СШИВКА").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                ForEach(task.proposed) { conversation in
+                    HStack(spacing: 10) {
+                        ToolBadge(platform: conversation.platform)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(conversation.title).lineLimit(1)
+                            Text(conversation.signals.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Добавить") { Task { await model.decide(.add(task: task.id, conversation: conversation.session)) } }
+                        Button("Не из этой задачи") { Task { await model.decide(.drop(task: task.id, conversation: conversation.session)) } }
+                    }
+                    .controlSize(.small)
+                    .padding(10)
+                    .background(.tint.opacity(0.06), in: .rect(cornerRadius: 10))
+                }
+                Text("БЕСЕДЫ ЗАДАЧИ").font(.caption.weight(.semibold)).foregroundStyle(.secondary).padding(.top, 8)
+            }
             ForEach(answer.conversations) { conversation in
                 let platform = task.conversations.first { $0.session == conversation.session }?.platform
                 HStack(alignment: .top, spacing: 14) {
@@ -27,6 +47,11 @@ struct ConversationsList: View {
                 }
                 .padding(12)
                 .background(.background.secondary, in: .rect(cornerRadius: 12))
+                .contextMenu {
+                    Button("Убрать из задачи") {
+                        Task { await model.decide(.drop(task: task.id, conversation: conversation.session)) }
+                    }
+                }
             }
         }
     }
@@ -49,8 +74,8 @@ struct RisksList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            group("Открытые", tree.risks.filter { !$0.outside && $0.status == .open })
-            group("Принятые и закрытые", tree.risks.filter { !$0.outside && $0.status != .open })
+            group("Открытые", tree.risks.filter { !$0.outside && $0.isOpen })
+            group("Принятые и закрытые", tree.risks.filter { !$0.outside && !$0.isOpen })
             group("Находки вне задачи", tree.risks.filter(\.outside))
         }
     }
@@ -69,7 +94,9 @@ struct RisksList: View {
                             Text(risk.level.rawValue).fontWeight(.semibold).foregroundStyle(Palette.color(risk.level))
                                 .frame(width: 64, alignment: .leading)
                             Text(risk.title).frame(maxWidth: .infinity, alignment: .leading)
-                            if risk.raisedIn > 1 {
+                            if let decided = risk.decided {
+                                Text(Wording.decided(decided)).foregroundStyle(.secondary)
+                            } else if risk.raisedIn > 1 {
                                 Text("в \(Wording.count(risk.raisedIn, "беседе", "беседах", "беседах"))").foregroundStyle(.secondary)
                             }
                         }

@@ -7,7 +7,13 @@
 // confirmed is proposed for that task, not added to it.
 //
 // Conversations are named by session, the one key that does not change as a transcript grows.
+//
+// The book also keeps the owner's word on the task's risks and whether the task is done
+// (ADR 0061). A task with an open critical risk is not marked done: the risk is accepted or
+// resolved first, with a reason (`docs/decision-map.md`, section 5).
 use std::collections::BTreeSet;
+
+use super::risk_decision::{RiskAnchor, RiskDecision};
 
 /// A task the owner confirmed.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16,6 +22,8 @@ pub struct ConfirmedTask {
     name: String,
     members: BTreeSet<String>,
     dropped: BTreeSet<String>,
+    risk_decisions: Vec<RiskDecision>,
+    finished_at_unix_ms: Option<i64>,
 }
 
 impl ConfirmedTask {
@@ -35,6 +43,16 @@ impl ConfirmedTask {
     /// Sessions the owner took out of the task. Stitching never proposes them for it again.
     pub fn dropped(&self) -> &BTreeSet<String> {
         &self.dropped
+    }
+
+    /// The owner's word on the task's risks, one per anchor.
+    pub fn risk_decisions(&self) -> &[RiskDecision] {
+        &self.risk_decisions
+    }
+
+    /// When the owner marked the task done; nothing while it is not.
+    pub fn finished_at_unix_ms(&self) -> Option<i64> {
+        self.finished_at_unix_ms
     }
 
     fn answers_to(&self, reference: &str) -> bool {
@@ -57,6 +75,23 @@ pub enum TaskBookError {
     NotInTask { session: String, task: String },
     /// A task needs at least one conversation.
     NoConversations,
+    /// A decision on a risk keeps why it was taken.
+    EmptyReason,
+    /// The owner never decided on the risk at this place, so there is nothing to reopen.
+    NoRiskDecision { task: String, anchor: RiskAnchor },
+    /// The task still has open critical risks; they are accepted or resolved first.
+    OpenCriticalRisks { task: String, count: usize },
+}
+
+/// A task as its store keeps it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RestoredTask {
+    pub id: String,
+    pub name: String,
+    pub members: BTreeSet<String>,
+    pub dropped: BTreeSet<String>,
+    pub risk_decisions: Vec<RiskDecision>,
+    pub finished_at_unix_ms: Option<i64>,
 }
 
 /// How the owner's decisions lay over what stitching found now.
@@ -79,18 +114,17 @@ pub struct TaskBook {
 impl TaskBook {
     /// A book read back from storage. Nothing is checked here that a decision did not check
     /// when it was taken; a book is only ever written by decisions.
-    pub fn restored(
-        tasks: Vec<(String, String, BTreeSet<String>, BTreeSet<String>)>,
-        rejected: Vec<BTreeSet<String>>,
-    ) -> Self {
+    pub fn restored(tasks: Vec<RestoredTask>, rejected: Vec<BTreeSet<String>>) -> Self {
         Self {
             tasks: tasks
                 .into_iter()
-                .map(|(id, name, members, dropped)| ConfirmedTask {
-                    id,
-                    name,
-                    members,
-                    dropped,
+                .map(|task| ConfirmedTask {
+                    id: task.id,
+                    name: task.name,
+                    members: task.members,
+                    dropped: task.dropped,
+                    risk_decisions: task.risk_decisions,
+                    finished_at_unix_ms: task.finished_at_unix_ms,
                 })
                 .collect(),
             rejected,
@@ -104,6 +138,11 @@ impl TaskBook {
     /// The sessions of every candidate the owner said is not a task.
     pub fn rejected(&self) -> &[BTreeSet<String>] {
         &self.rejected
+    }
+
+    /// The task called `reference`, by its name or id.
+    pub fn task(&self, reference: &str) -> Option<&ConfirmedTask> {
+        self.tasks.iter().find(|task| task.answers_to(reference))
     }
 
     /// The task a conversation belongs to.
@@ -131,6 +170,8 @@ impl TaskBook {
             name,
             members: sessions,
             dropped: BTreeSet::new(),
+            risk_decisions: Vec::new(),
+            finished_at_unix_ms: None,
         });
         Ok(&self.tasks[self.tasks.len() - 1])
     }
@@ -193,6 +234,68 @@ impl TaskBook {
     /// sharing the most; the rest of its conversations are what is proposed. A candidate whose
     /// conversations were all rejected together, or all left out of tasks they were dropped
     /// from, is not open. Everything else is.
+    /// Keeps the owner's word on the risk at `decision.anchor`, replacing an earlier one there.
+    pub fn decide_risk(&mut self, task: &str, decision: RiskDecision) -> Result<(), TaskBookError> {
+        if decision.reason.trim().is_empty() {
+            return Err(TaskBookError::EmptyReason);
+        }
+        let index = self.index_of(task)?;
+        if !self.tasks[index].members.contains(&decision.anchor.session) {
+            return Err(TaskBookError::NotInTask {
+                session: decision.anchor.session.clone(),
+                task: self.tasks[index].name.clone(),
+            });
+        }
+        let decisions = &mut self.tasks[index].risk_decisions;
+        decisions.retain(|kept| kept.anchor != decision.anchor);
+        decisions.push(RiskDecision {
+            reason: decision.reason.trim().to_string(),
+            ..decision
+        });
+        Ok(())
+    }
+
+    /// Takes the owner's word on the risk at `anchor` back: the risk is the model's again.
+    pub fn reopen_risk(&mut self, task: &str, anchor: &RiskAnchor) -> Result<(), TaskBookError> {
+        let index = self.index_of(task)?;
+        let target = &mut self.tasks[index];
+        let before = target.risk_decisions.len();
+        target.risk_decisions.retain(|kept| &kept.anchor != anchor);
+        if target.risk_decisions.len() == before {
+            return Err(TaskBookError::NoRiskDecision {
+                task: target.name.clone(),
+                anchor: anchor.clone(),
+            });
+        }
+        Ok(())
+    }
+
+    /// Marks the task done, unless `open_critical` of its risks are still open and critical.
+    pub fn finish(
+        &mut self,
+        task: &str,
+        at_unix_ms: i64,
+        open_critical: usize,
+    ) -> Result<(), TaskBookError> {
+        let index = self.index_of(task)?;
+        let target = &mut self.tasks[index];
+        if open_critical > 0 {
+            return Err(TaskBookError::OpenCriticalRisks {
+                task: target.name.clone(),
+                count: open_critical,
+            });
+        }
+        target.finished_at_unix_ms.get_or_insert(at_unix_ms);
+        Ok(())
+    }
+
+    /// Takes the task back into work.
+    pub fn resume(&mut self, task: &str) -> Result<(), TaskBookError> {
+        let index = self.index_of(task)?;
+        self.tasks[index].finished_at_unix_ms = None;
+        Ok(())
+    }
+
     pub fn arrange(&self, candidates: &[BTreeSet<String>]) -> Arrangement {
         let mut proposed = vec![BTreeSet::new(); self.tasks.len()];
         let mut open = Vec::new();
@@ -278,6 +381,67 @@ impl TaskBook {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::risk_decision::RiskVerdict;
+
+    fn accepted(session: &str, reply: usize, reason: &str, at_unix_ms: i64) -> RiskDecision {
+        RiskDecision {
+            anchor: RiskAnchor {
+                session: session.into(),
+                reply,
+            },
+            verdict: RiskVerdict::Accepted,
+            reason: reason.into(),
+            at_unix_ms,
+        }
+    }
+
+    #[test]
+    fn a_risk_decision_keeps_its_reason_replaces_the_earlier_one_and_can_be_taken_back() {
+        let mut book = TaskBook::default();
+        book.confirm("Скидки", set(&["a"])).unwrap();
+        assert_eq!(
+            book.decide_risk("Скидки", accepted("a", 3, "  ", 1)),
+            Err(TaskBookError::EmptyReason)
+        );
+        book.decide_risk("Скидки", accepted("a", 3, "есть снапшот", 1))
+            .unwrap();
+        book.decide_risk("Скидки", accepted("a", 3, " снапшот за ночь ", 2))
+            .unwrap();
+        let decisions = book.tasks()[0].risk_decisions();
+        assert_eq!(decisions.len(), 1);
+        assert_eq!(decisions[0].reason, "снапшот за ночь");
+
+        let anchor = decisions[0].anchor.clone();
+        book.reopen_risk("Скидки", &anchor).unwrap();
+        assert!(book.tasks()[0].risk_decisions().is_empty());
+        assert!(matches!(
+            book.reopen_risk("Скидки", &anchor),
+            Err(TaskBookError::NoRiskDecision { .. })
+        ));
+    }
+
+    /// The concept's rule: a task with an open critical risk is not quietly done.
+    #[test]
+    fn a_task_with_open_critical_risks_is_not_marked_done() {
+        let mut book = TaskBook::default();
+        book.confirm("Скидки", set(&["a"])).unwrap();
+        assert_eq!(
+            book.finish("Скидки", 5, 2),
+            Err(TaskBookError::OpenCriticalRisks {
+                task: "Скидки".into(),
+                count: 2
+            })
+        );
+        book.finish("Скидки", 5, 0).unwrap();
+        book.finish("Скидки", 9, 0).unwrap();
+        assert_eq!(
+            book.tasks()[0].finished_at_unix_ms(),
+            Some(5),
+            "done once, when first said"
+        );
+        book.resume("Скидки").unwrap();
+        assert_eq!(book.tasks()[0].finished_at_unix_ms(), None);
+    }
 
     fn set(sessions: &[&str]) -> BTreeSet<String> {
         sessions.iter().map(|s| s.to_string()).collect()

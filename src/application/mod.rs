@@ -42,6 +42,7 @@ mod subtree_volumes;
 mod task_board;
 mod task_candidates;
 mod task_map;
+mod task_progress;
 mod task_synthesis;
 mod watch;
 mod watch_ports;
@@ -123,7 +124,7 @@ pub use source_walker::{
     Admission, ContentSkipReason, EvidenceRead, SourceEntry, SourceVisitor, SourceWalker,
 };
 pub use task_board::{
-    Board, TaskBoard, TaskBoardError, TaskBookStore, TaskBookStoreError, TaskDecision,
+    Board, BoardTask, TaskBoard, TaskBoardError, TaskBookStore, TaskBookStoreError, TaskDecision,
 };
 /// The candidates alone, without the owner's decisions: what the end-to-end test of stitching
 /// asks for.
@@ -135,6 +136,7 @@ pub use task_map::{
     MappedConversation, ProposedStretch, REPLY_BYTES, SpokenReply, StoredMap, TaskMapError,
     TaskMapping, speech_of,
 };
+pub use task_progress::KeptProgress;
 pub use task_synthesis::{
     MapMerger, MergeInput, MergedProposal, ShownSynthesis, StoredSynthesis, SynthesisError,
     SynthesisStore, TaskSynthesizing,

@@ -71,10 +71,10 @@ pub fn write_task_conversations(documents: &Path) {
 
 /// The decisions pass's answer: one fork the first reply of the first conversation proves.
 const FORKS: &str = r#"{"forks":[{"question":"Где считать скидку?","reply":1,"quote":"Почему скидка дважды","branches":[{"option":"разобраться","state":"chosen","reason":"","reply":1,"quote":"Почему скидка дважды"}]}]}"#;
-/// The risks pass's answer: one risk a quote proves and one it does not.
-const RISKS: &str = r#"{"risks":[{"description":"причина не найдена","level":"high","status":"open","in_task":true,"reply":1,"quote":"Почему скидка дважды"},{"description":"выдумано","level":"high","status":"open","in_task":true,"reply":1,"quote":"этих слов в реплике нет"}]}"#;
+/// The risks pass's answer: one critical risk a quote proves and one risk it does not.
+const RISKS: &str = r#"{"risks":[{"description":"причина не найдена","level":"critical","status":"open","in_task":true,"reply":1,"quote":"Почему скидка дважды"},{"description":"выдумано","level":"high","status":"open","in_task":true,"reply":1,"quote":"этих слов в реплике нет"}]}"#;
 /// The join's answer: the fork as the main line and the risk as the task's.
-const JOINED: &str = r#"{"main_line":[{"title":"Разобраться со скидкой","state":"chosen","nodes":["c0.f0"]}],"risks":[{"title":"Причина не найдена","level":"high","status":"open","nodes":["c0.r0"]}],"findings":[]}"#;
+const JOINED: &str = r#"{"main_line":[{"title":"Разобраться со скидкой","state":"chosen","nodes":["c0.f0"]}],"risks":[{"title":"Причина не найдена","level":"critical","status":"open","nodes":["c0.r0"]}],"findings":[]}"#;
 
 /// A `claude` that answers every map question by its schema and writes the pass it answered
 /// (`forks`, `risks` or `join`) as a line of `calls`. The directory to put first on PATH, and

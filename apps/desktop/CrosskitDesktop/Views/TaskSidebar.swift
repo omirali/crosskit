@@ -1,22 +1,36 @@
 import CrosskitKit
 import SwiftUI
 
-/// Задачи контекста: подтверждённые владельцем и кандидаты сшивки.
+/// Доска, задачи, которые владелец подтвердил, и кандидаты сшивки. Решения о задаче — в меню
+/// её строки.
 struct TaskSidebar: View {
 
     @Bindable var model: DesktopModel
 
     var body: some View {
         List(selection: $model.choice) {
+            Label("Доска", systemImage: "rectangle.split.3x1").tag(TaskChoice.board)
             if case .loaded(let board) = model.board {
                 Section("Задачи") {
                     ForEach(board.confirmed) { task in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(task.name).font(.headline).lineLimit(1)
+                            HStack(spacing: 6) {
+                                Text(task.name).font(.headline).lineLimit(1)
+                                if task.finishedAtUnixMs != nil {
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                                        .accessibilityLabel("Готово")
+                                }
+                                if let critical = task.progress?.openCritical, critical > 0, task.finishedAtUnixMs == nil {
+                                    Text("\(critical)").font(.caption2.weight(.bold)).foregroundStyle(.white)
+                                        .padding(.horizontal, 5).background(.red, in: .capsule)
+                                        .help("Открытых критичных рисков: \(critical)")
+                                }
+                            }
                             Text(Wording.count(task.conversations.count, "беседа", "беседы", "бесед"))
                                 .font(.subheadline).foregroundStyle(.secondary)
                         }
                         .tag(TaskChoice.confirmed(id: task.id))
+                        .contextMenu { TaskActions(model: model, task: task) }
                     }
                 }
                 if !board.candidates.isEmpty {
@@ -28,6 +42,7 @@ struct TaskSidebar: View {
                                     .font(.subheadline).foregroundStyle(.secondary)
                             }
                             .tag(TaskChoice.candidate(index: index))
+                            .contextMenu { CandidateActions(model: model, candidate: candidate) }
                         }
                     }
                 }

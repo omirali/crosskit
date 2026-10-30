@@ -8,15 +8,22 @@
 //
 // A conversation is named by its session, or by the start of it when that is unique among the
 // conversations read — a person types eight characters, not thirty-six.
+//
+// The owner's word on a task's risks and whether it is done are decisions of the same book
+// (ADR 0061). Marking a task done asks where it stands, because a task with an open critical
+// risk is not done; the board shows where every task stands for the same reason.
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
+use crate::domain::risk_decision::{RiskAnchor, RiskDecision, RiskVerdict};
 use crate::domain::{ConfirmedTask, TaskBook, TaskBookError};
 
 use super::repository::RepositoryError;
 use super::task_candidates::{
     ConversationLogReader, Stitched, TaskCandidate, TaskCandidates, TaskMember,
 };
+use super::task_map::MapStoreFailure;
+use super::task_progress::{TaskProgress, TaskProgressReader};
 
 /// The fewest characters of a session that may stand for it.
 const SHORTEST_SESSION_PREFIX: usize = 4;
@@ -78,6 +85,25 @@ pub enum TaskDecision {
         task: String,
         name: String,
     },
+    /// The owner's word on the risk whose quote is in `reply` of this conversation; nothing
+    /// takes an earlier word back.
+    Risk {
+        task: String,
+        session: String,
+        reply: usize,
+        verdict: Option<RiskVerdict>,
+        reason: String,
+        at_unix_ms: i64,
+    },
+    /// The task is done.
+    Finish {
+        task: String,
+        at_unix_ms: i64,
+    },
+    /// The task is in work again.
+    Resume {
+        task: String,
+    },
 }
 
 /// Why the board could not be shown or a decision taken.
@@ -90,6 +116,8 @@ pub enum TaskBoardError {
     UnknownConversation(String),
     /// More than one conversation starts this way; the sessions are named.
     AmbiguousConversation(String, Vec<String>),
+    /// Where a task stands could not be read from its maps.
+    Progress(MapStoreFailure),
 }
 
 /// A confirmed task as it stands now.
@@ -98,6 +126,7 @@ pub struct BoardTask {
     task: ConfirmedTask,
     members: Vec<TaskMember>,
     proposed: Vec<TaskMember>,
+    progress: Option<TaskProgress>,
 }
 
 impl BoardTask {
@@ -118,6 +147,15 @@ impl BoardTask {
     /// What stitching ties to the task now and the owner has not decided on.
     pub fn proposed(&self) -> &[TaskMember] {
         &self.proposed
+    }
+
+    /// Where the task stands by its maps; nothing when the board was not asked to read them.
+    pub fn progress(&self) -> Option<&TaskProgress> {
+        self.progress.as_ref()
+    }
+
+    pub fn confirmed(&self) -> &ConfirmedTask {
+        &self.task
     }
 }
 
@@ -143,6 +181,7 @@ pub struct TaskBoard<'a, Reader: ConversationLogReader, Store: TaskBookStore> {
     reader: &'a Reader,
     store: &'a Store,
     home: &'a str,
+    progress: Option<&'a dyn TaskProgressReader>,
 }
 
 impl<'a, Reader: ConversationLogReader, Store: TaskBookStore> TaskBoard<'a, Reader, Store> {
@@ -152,12 +191,19 @@ impl<'a, Reader: ConversationLogReader, Store: TaskBookStore> TaskBoard<'a, Read
             reader,
             store,
             home,
+            progress: None,
         }
+    }
+
+    /// Reads where every task stands, and lets a task be marked done.
+    pub fn with_progress(mut self, progress: &'a dyn TaskProgressReader) -> Self {
+        self.progress = Some(progress);
+        self
     }
 
     pub fn show(&self) -> Result<Board, TaskBoardError> {
         let book = self.store.load().map_err(TaskBoardError::Store)?;
-        Ok(board_of(&book, &self.stitched()?))
+        self.with_standing(board_of(&book, &self.stitched()?))
     }
 
     /// Takes `decision` against what stitching finds now, keeps it, and shows the board after
@@ -165,9 +211,23 @@ impl<'a, Reader: ConversationLogReader, Store: TaskBookStore> TaskBoard<'a, Read
     pub fn decide(&self, decision: &TaskDecision) -> Result<Board, TaskBoardError> {
         let mut book = self.store.load().map_err(TaskBoardError::Store)?;
         let stitched = self.stitched()?;
-        apply(&mut book, &stitched, decision)?;
+        apply(&mut book, &stitched, decision, self.progress)?;
         self.store.save(&book).map_err(TaskBoardError::Store)?;
-        Ok(board_of(&book, &stitched))
+        self.with_standing(board_of(&book, &stitched))
+    }
+
+    fn with_standing(&self, mut board: Board) -> Result<Board, TaskBoardError> {
+        let Some(reader) = self.progress else {
+            return Ok(board);
+        };
+        for task in &mut board.tasks {
+            task.progress = Some(
+                reader
+                    .progress(&task.task)
+                    .map_err(TaskBoardError::Progress)?,
+            );
+        }
+        Ok(board)
     }
 
     fn stitched(&self) -> Result<Stitched, TaskBoardError> {
@@ -181,6 +241,7 @@ fn apply(
     book: &mut TaskBook,
     stitched: &Stitched,
     decision: &TaskDecision,
+    progress: Option<&dyn TaskProgressReader>,
 ) -> Result<(), TaskBoardError> {
     let decided = match decision {
         TaskDecision::Confirm { session, name } => {
@@ -208,6 +269,49 @@ fn apply(
             book.drop_member(task, &session)
         }
         TaskDecision::Rename { task, name } => book.rename(task, name),
+        TaskDecision::Risk {
+            task,
+            session,
+            reply,
+            verdict,
+            reason,
+            at_unix_ms,
+        } => {
+            let anchor = RiskAnchor {
+                session: session_named(book, stitched, session)?,
+                reply: *reply,
+            };
+            match verdict {
+                Some(verdict) => book.decide_risk(
+                    task,
+                    RiskDecision {
+                        anchor,
+                        verdict: *verdict,
+                        reason: reason.clone(),
+                        at_unix_ms: *at_unix_ms,
+                    },
+                ),
+                None => book.reopen_risk(task, &anchor),
+            }
+        }
+        TaskDecision::Finish { task, at_unix_ms } => {
+            let Some(reader) = progress else {
+                return Err(TaskBoardError::Progress(MapStoreFailure(
+                    "where the task stands is not known to this board".to_string(),
+                )));
+            };
+            let open_critical = match book.task(task) {
+                Some(confirmed) => {
+                    reader
+                        .progress(confirmed)
+                        .map_err(TaskBoardError::Progress)?
+                        .open_critical
+                }
+                None => 0,
+            };
+            book.finish(task, *at_unix_ms, open_critical)
+        }
+        TaskDecision::Resume { task } => book.resume(task),
     };
     decided.map_err(TaskBoardError::Decision)
 }
@@ -320,6 +424,7 @@ fn board_of(book: &TaskBook, stitched: &Stitched) -> Board {
                 task: task.clone(),
                 members,
                 proposed,
+                progress: None,
             }
         })
         .collect();

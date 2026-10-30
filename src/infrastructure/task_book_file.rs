@@ -15,12 +15,14 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 
 use crate::application::{TaskBookStore, TaskBookStoreError};
-use crate::domain::{TaskBook, WorkspaceName};
+use crate::domain::risk_decision::{RiskAnchor, RiskDecision, RiskVerdict};
+use crate::domain::{RestoredTask, TaskBook, WorkspaceName};
 
 use super::app_directories::data_directory;
 use super::whole_file::replace_whole;
 
-/// The version of the file's shape. Raised when a field changes meaning or goes away.
+/// The version of the file's shape. Raised when a field changes meaning or goes away; a field
+/// added with a default keeps it, so a build that does not know the field still reads the file.
 const VERSION: u32 = 1;
 
 #[derive(Serialize, Deserialize)]
@@ -37,6 +39,21 @@ struct TaskEntry {
     name: String,
     members: BTreeSet<String>,
     dropped: BTreeSet<String>,
+    /// The owner's word on the task's risks (ADR 0061).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    risk_decisions: Vec<RiskDecisionEntry>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    finished_at_unix_ms: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct RiskDecisionEntry {
+    session: String,
+    reply: usize,
+    /// `accepted` or `resolved`.
+    verdict: String,
+    reason: String,
+    at_unix_ms: i64,
 }
 
 /// The book of one context.
@@ -75,13 +92,42 @@ impl TaskBookStore for TaskBookFile {
                 file.version
             )));
         }
-        Ok(TaskBook::restored(
-            file.tasks
-                .into_iter()
-                .map(|task| (task.id, task.name, task.members, task.dropped))
-                .collect(),
-            file.rejected,
-        ))
+        let tasks = file
+            .tasks
+            .into_iter()
+            .map(|task| {
+                let risk_decisions = task
+                    .risk_decisions
+                    .into_iter()
+                    .map(|entry| {
+                        let verdict = RiskVerdict::parse(&entry.verdict).ok_or_else(|| {
+                            unreadable(
+                                &self.path,
+                                format!("a risk decision says {:?}", entry.verdict),
+                            )
+                        })?;
+                        Ok(RiskDecision {
+                            anchor: RiskAnchor {
+                                session: entry.session,
+                                reply: entry.reply,
+                            },
+                            verdict,
+                            reason: entry.reason,
+                            at_unix_ms: entry.at_unix_ms,
+                        })
+                    })
+                    .collect::<Result<Vec<_>, TaskBookStoreError>>()?;
+                Ok(RestoredTask {
+                    id: task.id,
+                    name: task.name,
+                    members: task.members,
+                    dropped: task.dropped,
+                    risk_decisions,
+                    finished_at_unix_ms: task.finished_at_unix_ms,
+                })
+            })
+            .collect::<Result<Vec<_>, TaskBookStoreError>>()?;
+        Ok(TaskBook::restored(tasks, file.rejected))
     }
 
     fn save(&self, book: &TaskBook) -> Result<(), TaskBookStoreError> {
@@ -95,6 +141,18 @@ impl TaskBookStore for TaskBookFile {
                     name: task.name().to_string(),
                     members: task.members().clone(),
                     dropped: task.dropped().clone(),
+                    risk_decisions: task
+                        .risk_decisions()
+                        .iter()
+                        .map(|decision| RiskDecisionEntry {
+                            session: decision.anchor.session.clone(),
+                            reply: decision.anchor.reply,
+                            verdict: decision.verdict.code().to_string(),
+                            reason: decision.reason.clone(),
+                            at_unix_ms: decision.at_unix_ms,
+                        })
+                        .collect(),
+                    finished_at_unix_ms: task.finished_at_unix_ms(),
                 })
                 .collect(),
             rejected: book.rejected().to_vec(),
@@ -138,9 +196,38 @@ mod tests {
         .unwrap();
         book.drop_member("Двойная скидка", "b").unwrap();
         book.reject(BTreeSet::from(["x".to_string()]));
+        book.decide_risk(
+            "Двойная скидка",
+            RiskDecision {
+                anchor: RiskAnchor {
+                    session: "a".into(),
+                    reply: 12,
+                },
+                verdict: RiskVerdict::Accepted,
+                reason: "бэкап в ночном снапшоте".into(),
+                at_unix_ms: 1_790_000_000_000,
+            },
+        )
+        .unwrap();
+        book.finish("Двойная скидка", 1_790_000_100_000, 0).unwrap();
         store.save(&book).unwrap();
         assert_eq!(store.load().unwrap(), book);
         assert!(!path.with_extension("new").exists());
+        fs::remove_dir_all(path.parent().unwrap()).expect("the temporary directory is removable");
+    }
+
+    /// A book written before risk decisions existed reads as a book without them.
+    #[test]
+    fn a_book_without_the_later_fields_reads() {
+        let path = book_path("earlier");
+        fs::write(
+            &path,
+            r#"{"version":1,"tasks":[{"id":"task:a","name":"Скидки","members":["a"],"dropped":[]}],"rejected":[]}"#,
+        )
+        .unwrap();
+        let book = TaskBookFile::at(path.clone()).load().unwrap();
+        assert!(book.tasks()[0].risk_decisions().is_empty());
+        assert_eq!(book.tasks()[0].finished_at_unix_ms(), None);
         fs::remove_dir_all(path.parent().unwrap()).expect("the temporary directory is removable");
     }
 

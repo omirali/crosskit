@@ -176,13 +176,14 @@ struct DecisionTreeView: View {
                 Circle().fill(Palette.color(level)).frame(width: 7, height: 7)
                 Text(level.rawValue).font(.caption.weight(.semibold)).foregroundStyle(Palette.color(level))
                 Text(risk?.title ?? "").font(.caption).lineLimit(1)
-                if let risk, risk.status != .open {
-                    Text(Wording.label(risk.status)).font(.caption).foregroundStyle(.secondary)
+                if let risk, !risk.isOpen {
+                    Text(risk.decided.map(Wording.decided) ?? Wording.label(risk.shownStatus))
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
             .padding(.horizontal, 9)
             .padding(.vertical, 3)
-            .background(selected ? AnyShapeStyle(.tint.opacity(0.18)) : AnyShapeStyle(Palette.color(level).opacity(risk?.status == .open ? 0.12 : 0.05)),
+            .background(selected ? AnyShapeStyle(.tint.opacity(0.18)) : AnyShapeStyle(Palette.color(level).opacity(risk?.isOpen == true ? 0.12 : 0.05)),
                         in: .rect(cornerRadius: 8))
         }
         .buttonStyle(.plain)

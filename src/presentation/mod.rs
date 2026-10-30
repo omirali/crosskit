@@ -29,6 +29,8 @@ mod period;
 mod policy;
 mod reading_ground;
 mod refusal;
+/// Stage 37: where a file was worked on, and what a conversation worked on.
+mod risk_decision_lines;
 mod root_report;
 mod run_cost;
 mod scope_directory;
@@ -49,7 +51,6 @@ mod setup_indexing;
 mod setup_report;
 mod setup_wording;
 mod status;
-/// Stage 37: where a file was worked on, and what a conversation worked on.
 mod task_map;
 mod tasks;
 mod touches;

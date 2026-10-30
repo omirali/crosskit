@@ -5,19 +5,19 @@ import SwiftUI
 /// Выбранный узел: из чего выбирали и почему, дословная цитата, кто её сказал, в какой беседе.
 struct NodeInspector: View {
 
+    let model: DesktopModel
     let tree: DecisionTree
     let task: ConfirmedTask
-    let focus: NodeFocus?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                switch focus {
+                switch model.focus {
                 case .step(let id) where tree.steps.indices.contains(id):
                     StepDetail(step: tree.steps[id], total: tree.steps.count, task: task)
                 case .risk(let id):
                     if let risk = tree.risks.first(where: { $0.id == id }) {
-                        RiskDetail(risk: risk, task: task)
+                        RiskDetail(model: model, risk: risk, task: task)
                     }
                 default:
                     ContentUnavailableView("Узел не выбран", systemImage: "cursorarrow.click")
@@ -68,6 +68,7 @@ private struct StepDetail: View {
 }
 
 private struct RiskDetail: View {
+    let model: DesktopModel
     let risk: DecisionTree.Risk
     let task: ConfirmedTask
 
@@ -75,9 +76,9 @@ private struct RiskDetail: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(risk.level.rawValue).font(.caption.weight(.bold)).padding(.horizontal, 8).padding(.vertical, 2)
-                    .foregroundStyle(Palette.color(risk.level))
-                    .background(Palette.color(risk.level).opacity(0.15), in: .capsule)
-                Text(Wording.label(risk.status)).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    .foregroundStyle(risk.isOpen ? Palette.color(risk.level) : .secondary)
+                    .background((risk.isOpen ? Palette.color(risk.level) : .secondary).opacity(0.15), in: .capsule)
+                Text(Wording.label(risk.shownStatus)).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 if risk.outside {
                     Text("вне задачи").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 }
@@ -88,10 +89,47 @@ private struct RiskDetail: View {
                     .foregroundStyle(.secondary)
             }
         }
+        decision
         ForEach(risk.quotes, id: \.self) { quote in
             QuoteBox(quote: quote, task: task)
         }
     }
+
+    /// Слово владельца о риске: каким оно уже есть или каким его сказать. Решение хранится по
+    /// месту первой цитаты риска; у риска из нескольких бесед годится любое (ADR 0061).
+    @ViewBuilder
+    private var decision: some View {
+        if let anchor = risk.quotes.first {
+            if let decided = risk.decided {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(Wording.decided(decided).capitalizedFirst).font(.callout.weight(.semibold))
+                    Text(decided.reason).foregroundStyle(.secondary).textSelection(.enabled)
+                    Button("Вернуть риск карте") {
+                        Task { await model.decide(.reopenRisk(task: task.id, session: anchor.session, reply: anchor.reply)) }
+                    }
+                    .buttonStyle(.link)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.green.opacity(0.08), in: .rect(cornerRadius: 10))
+            } else {
+                HStack {
+                    ForEach([RiskStatus.accepted, .resolved], id: \.self) { verdict in
+                        Button(verdict == .accepted ? "Принять…" : "Закрыть…") {
+                            model.reasonRequest = ReasonRequest(risk: risk.title, verdict: verdict) {
+                                .risk(task: task.id, session: anchor.session, reply: anchor.reply, verdict: verdict, reason: $0)
+                            }
+                        }
+                    }
+                }
+                .controlSize(.small)
+            }
+        }
+    }
+}
+
+private extension String {
+    var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }
 
 /// Цитата, которой доказан узел, и откуда она; из неё же — команда продолжить беседу.

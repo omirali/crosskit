@@ -106,7 +106,7 @@ pub use local_calendar::local_today;
 pub use open_file_limit::raise_open_file_limit;
 pub use output_stream::{OutputStream, reading_end_is_gone};
 pub use search::{ContextSearchIndex, built_in_period_phrases, search_directory};
-pub use system_clock::SystemClock;
+pub use system_clock::{SystemClock, unix_now_ms};
 pub use task_book_file::TaskBookFile;
 pub use task_map_file::TaskMapFiles;
 pub use utc_stamp::{utc_moment, utc_stamp};

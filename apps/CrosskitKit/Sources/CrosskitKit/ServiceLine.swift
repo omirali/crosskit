@@ -29,8 +29,7 @@ public enum ServiceLine {
         // Сокет, поднятый другим пользователем, вопроса не получает.
         guard servedBySameUser(descriptor) else { throw .notRunning }
         guard writeAll(descriptor, request + Data([0x0A])) else { throw .unreadable }
-        guard let answer = readLine(descriptor) else { throw .unreadable }
-        return answer
+        return try readLine(descriptor)
     }
 
     private static func limit(_ descriptor: Int32, to timeout: Duration) {
@@ -61,13 +60,15 @@ public enum ServiceLine {
         }
     }
 
-    /// Строка до перевода строки; конец соединения раньше неё — не ответ.
-    private static func readLine(_ descriptor: Int32) -> Data? {
+    /// Строка до перевода строки. Срок вышел — служба молчит; конец соединения раньше строки —
+    /// это не ответ.
+    private static func readLine(_ descriptor: Int32) throws(ServiceError) -> Data {
         var answer = Data()
         var chunk = [UInt8](repeating: 0, count: 64 * 1024)
         while true {
             let count = read(descriptor, &chunk, chunk.count)
-            if count <= 0 { return nil }
+            if count < 0, errno == EAGAIN || errno == EWOULDBLOCK { throw .timedOut }
+            if count <= 0 { throw .unreadable }
             if let end = chunk[..<count].firstIndex(of: 0x0A) {
                 answer.append(contentsOf: chunk[..<end])
                 return answer

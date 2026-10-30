@@ -15,15 +15,20 @@
 // worded here, the same way a run of its own would word it.
 use serde::{Deserialize, Serialize};
 
-use crate::application::{Board, TaskBoard, TaskBoardError, TaskDecision, TaskMember, Tie};
+use crate::application::{
+    Board, BoardTask, KeptProgress, TaskBoard, TaskBoardError, TaskDecision, TaskMember, Tie,
+};
+use crate::domain::risk_decision::RiskVerdict;
 use crate::domain::task_stitching::session::Platform;
 use crate::domain::task_stitching::stitching::LinkSignal;
 use crate::domain::{CivilDate, TaskBookError, WorkspaceName};
-use crate::infrastructure::{TaskBookFile, home_directory};
+use crate::infrastructure::analysis::MAP_QUESTION_VERSION;
+use crate::infrastructure::{TaskBookFile, TaskMapFiles, home_directory, unix_now_ms};
 
 use super::machine_answer::{self, FailureCategory, SCHEMA, object_line, refusal_line};
 use super::reading_ground::{OwnRun, ReadingGround};
 use super::refusal::Refusal;
+use super::risk_decision_lines::RiskDecisionLine;
 use super::service_client;
 use super::workspace;
 
@@ -34,6 +39,9 @@ pub(super) const USAGE: &str = "Usage: crosskit [--context <name>] tasks [--json
        crosskit [--context <name>] tasks add <task> <conversation> [--json]
        crosskit [--context <name>] tasks drop <task> <conversation> [--json]
        crosskit [--context <name>] tasks rename <task> <name> [--json]
+       crosskit [--context <name>] tasks accept|resolve <task> <conversation> <reply> --reason <why> [--json]
+       crosskit [--context <name>] tasks reopen <task> <conversation> <reply> [--json]
+       crosskit [--context <name>] tasks finish|resume <task> [--json]
        crosskit [--context <name>] tasks map <task> [--build | --join] [--only <conversation>] [--detail] [--json]";
 
 /// How much of an unnamed conversation's opening stands for its name.
@@ -137,7 +145,9 @@ fn answer(
     let repository = manager.repository();
     let book =
         TaskBookFile::of_context(&chosen).map_err(|error| Refusal::failed(error.to_string()))?;
-    let board = TaskBoard::new(&repository, &book, &home);
+    let maps = TaskMapFiles::of_context(&chosen).map_err(|failure| Refusal::failed(failure.0))?;
+    let standing = KeptProgress::new(&maps, MAP_QUESTION_VERSION);
+    let board = TaskBoard::new(&repository, &book, &home).with_progress(&standing);
     let shown = match &decision {
         Some(decision) => board.decide(decision),
         None => board.show(),
@@ -182,9 +192,48 @@ fn parse(arguments: &[String]) -> Result<Option<TaskDecision>, String> {
             task: owned(task),
             name: owned(name),
         },
+        [
+            verb @ ("accept" | "resolve"),
+            task,
+            session,
+            reply,
+            "--reason",
+            reason,
+        ] => TaskDecision::Risk {
+            task: owned(task),
+            session: owned(session),
+            reply: reply_number(reply)?,
+            verdict: Some(if *verb == "accept" {
+                RiskVerdict::Accepted
+            } else {
+                RiskVerdict::Resolved
+            }),
+            reason: owned(reason),
+            at_unix_ms: unix_now_ms(),
+        },
+        ["reopen", task, session, reply] => TaskDecision::Risk {
+            task: owned(task),
+            session: owned(session),
+            reply: reply_number(reply)?,
+            verdict: None,
+            reason: String::new(),
+            at_unix_ms: unix_now_ms(),
+        },
+        ["finish", task] => TaskDecision::Finish {
+            task: owned(task),
+            at_unix_ms: unix_now_ms(),
+        },
+        ["resume", task] => TaskDecision::Resume { task: owned(task) },
         _ => return Err(format!("Not a tasks command: {}", words.join(" "))),
     };
     Ok(Some(decision))
+}
+
+/// The reply a risk's quote is in, as `tasks map` prints it in brackets.
+fn reply_number(word: &str) -> Result<usize, String> {
+    word.trim_matches(['[', ']'])
+        .parse()
+        .map_err(|_| format!("{word} is not a reply number"))
 }
 
 fn unanswered_of(error: TaskBoardError) -> Unanswered {
@@ -195,6 +244,12 @@ fn unanswered_of(error: TaskBoardError) -> Unanswered {
         }
         TaskBoardError::Store(store) => {
             return Unanswered::Refused(Refusal::failed(store.to_string()));
+        }
+        TaskBoardError::Progress(failure) => {
+            return Unanswered::Refused(Refusal::failed(format!(
+                "Where the task stands could not be read from its maps: {}",
+                failure.0
+            )));
         }
         TaskBoardError::UnknownConversation(reference) => {
             Declined::UnknownConversation { reference }
@@ -214,6 +269,15 @@ fn unanswered_of(error: TaskBoardError) -> Unanswered {
             }
             TaskBookError::NotInTask { session, task } => Declined::NotInTask { session, task },
             TaskBookError::NoConversations => Declined::NoConversations,
+            TaskBookError::EmptyReason => Declined::EmptyReason,
+            TaskBookError::NoRiskDecision { task, anchor } => Declined::NoRiskDecision {
+                task,
+                session: anchor.session,
+                reply: anchor.reply,
+            },
+            TaskBookError::OpenCriticalRisks { task, count } => {
+                Declined::OpenCriticalRisks { task, count }
+            }
         },
     };
     Unanswered::Declined(declined)
@@ -246,12 +310,24 @@ enum Declined {
         task: String,
     },
     NoConversations,
+    EmptyReason,
+    NoRiskDecision {
+        task: String,
+        session: String,
+        reply: usize,
+    },
+    OpenCriticalRisks {
+        task: String,
+        count: usize,
+    },
 }
 
 impl Declined {
     fn category(&self) -> FailureCategory {
         match self {
-            Self::UnknownConversation { .. } | Self::NoSuchTask { .. } => FailureCategory::NotFound,
+            Self::UnknownConversation { .. }
+            | Self::NoSuchTask { .. }
+            | Self::NoRiskDecision { .. } => FailureCategory::NotFound,
             _ => FailureCategory::Usage,
         }
     }
@@ -280,6 +356,20 @@ impl Declined {
                 format!("Conversation {session} is not in «{task}».")
             }
             Self::NoConversations => "A task needs at least one conversation.".to_string(),
+            Self::EmptyReason => "A decision on a risk says why: --reason \"<why>\".".to_string(),
+            Self::NoRiskDecision {
+                task,
+                session,
+                reply,
+            } => format!(
+                "Nothing was decided on the risk at reply {reply} of {session} in «{task}», so \
+                 there is nothing to reopen."
+            ),
+            Self::OpenCriticalRisks { task, count } => format!(
+                "«{task}» still has {count} open critical risk(s). Accept or resolve them with a \
+                 reason first: crosskit tasks accept|resolve \"{task}\" <conversation> <reply> \
+                 --reason \"<why>\"."
+            ),
         }
     }
 }
@@ -308,6 +398,27 @@ struct Confirmed {
     conversations: Vec<Conversation>,
     /// What stitching ties to the task now and the owner has not decided on.
     proposed: Vec<Conversation>,
+    /// Where the task stands by its maps (ADR 0061).
+    #[serde(default)]
+    progress: Option<Progress>,
+    /// When the owner marked it done.
+    #[serde(default)]
+    finished_at_unix_ms: Option<i64>,
+    /// The owner's word on its risks, by the place each risk's quote stands.
+    #[serde(default)]
+    risk_decisions: Vec<RiskDecisionLine>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Progress {
+    conversations: usize,
+    mapped: usize,
+    steps: usize,
+    /// A branch state: `open` means the task waits for the owner.
+    head: Option<String>,
+    open_risks: usize,
+    open_critical: usize,
+    decided_risks: usize,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -362,16 +473,7 @@ fn board_line(context: &WorkspaceName, board: &Board) -> String {
     object_line(&Answer {
         schema: SCHEMA,
         context: context.as_str().to_string(),
-        confirmed: board
-            .tasks()
-            .iter()
-            .map(|task| Confirmed {
-                id: task.id().to_string(),
-                name: task.name().to_string(),
-                conversations: conversations_of(task.members()),
-                proposed: conversations_of(task.proposed()),
-            })
-            .collect(),
+        confirmed: board.tasks().iter().map(confirmed_of).collect(),
         tasks: board
             .candidates()
             .iter()
@@ -380,6 +482,31 @@ fn board_line(context: &WorkspaceName, board: &Board) -> String {
             })
             .collect(),
     })
+}
+
+fn confirmed_of(task: &BoardTask) -> Confirmed {
+    Confirmed {
+        id: task.id().to_string(),
+        name: task.name().to_string(),
+        conversations: conversations_of(task.members()),
+        proposed: conversations_of(task.proposed()),
+        progress: task.progress().map(|progress| Progress {
+            conversations: progress.conversations,
+            mapped: progress.mapped,
+            steps: progress.steps,
+            head: progress.head.map(|state| state.code().to_string()),
+            open_risks: progress.open_risks,
+            open_critical: progress.open_critical,
+            decided_risks: progress.decided_risks,
+        }),
+        finished_at_unix_ms: task.confirmed().finished_at_unix_ms(),
+        risk_decisions: task
+            .confirmed()
+            .risk_decisions()
+            .iter()
+            .map(RiskDecisionLine::from)
+            .collect(),
+    }
 }
 
 /// The signal as both answers spell it. A contract with every reader of `--json`, written out
@@ -434,12 +561,20 @@ fn print_answer(answer: &Answer) {
 
 fn print_task(task: &Confirmed) {
     println!();
+    let done = if task.finished_at_unix_ms.is_some() {
+        " — done"
+    } else {
+        ""
+    };
     println!(
-        "{} — {} conversation(s), {}",
+        "{} — {} conversation(s), {}{done}",
         task.name,
         task.conversations.len(),
         span_of(&task.conversations)
     );
+    if let Some(progress) = &task.progress {
+        println!("  {}", progress_line(progress));
+    }
     for conversation in &task.conversations {
         println!("  {}", conversation_line(conversation, false));
     }
@@ -453,6 +588,29 @@ fn print_task(task: &Confirmed) {
             println!("  + {}", conversation_line(conversation, true));
         }
     }
+}
+
+/// Where a task stands, in one line.
+fn progress_line(progress: &Progress) -> String {
+    if progress.mapped == 0 {
+        return format!(
+            "Not mapped: crosskit tasks map <task> --build maps its {} conversation(s).",
+            progress.conversations
+        );
+    }
+    let head = match progress.head.as_deref() {
+        Some("open") => ", waits for your decision",
+        _ => "",
+    };
+    format!(
+        "Mapped {} of {} · main line {} step(s){head} · open risks {} ({} critical) · decided {}",
+        progress.mapped,
+        progress.conversations,
+        progress.steps,
+        progress.open_risks,
+        progress.open_critical,
+        progress.decided_risks
+    )
 }
 
 fn conversation_line(conversation: &Conversation, with_signals: bool) -> String {
